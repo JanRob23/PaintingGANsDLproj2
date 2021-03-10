@@ -69,7 +69,7 @@ def augment(images):
 def combinePhotos(paintings, photos):
     #5400 monet paintings, 7038 photos
     ypaint = [1] * 5400
-    yphoto = [0] * 7038
+    yphoto = [-1] * 7038
     y = np.array(ypaint + yphoto)
 
     #combine both image sets
