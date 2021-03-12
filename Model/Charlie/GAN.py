@@ -6,7 +6,7 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from tensorflow.examples.tutorials.mnist import input_data
+import tensorflow_datasets
 
 class Discriminator(nn.Module):
     def __init__(self, img_dim):
@@ -53,7 +53,7 @@ class Gan():
         transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.5,),(0.5,))]
         )
-        dataset = input_data.read_data_sets('MNIST_data', one_hot=True)
+        dataset = tensorflow_datasets.load('mnist')
         loader = DataLoader(dataset, self.batch, shuffle=True)
         opt_disc = nn.Adam(disc.parameters(), lr=self.learning_rate)
         opt_gen = nn.Adam(gen.parameters(), lr=self.learning_rate)
