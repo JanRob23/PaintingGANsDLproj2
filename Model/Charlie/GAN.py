@@ -55,8 +55,8 @@ class Gan():
         )
         dataset = tensorflow_datasets.load('mnist')
         loader = DataLoader(dataset, self.batch, shuffle=True)
-        opt_disc = nn.Adam(disc.parameters(), lr=self.learning_rate)
-        opt_gen = nn.Adam(gen.parameters(), lr=self.learning_rate)
+        opt_disc = optim.Adam(disc.parameters(), lr=self.learning_rate)
+        opt_gen = optim.Adam(gen.parameters(), lr=self.learning_rate)
         criterion = nn.BCELoss()
 
         #tensor board
