@@ -5,4 +5,4 @@ from Model.Charlie.GAN import Gan
 # print(x.shape, y.shape)
 def go():
     gan = Gan()
-    gan.train
+    gan.train()
