@@ -14,6 +14,7 @@ def go(filepath_photos, filepath_paintings):
     photos = glob.glob(filepath_photos)
     paintings = glob.glob(filepath_paintings)
     paintings, photos = read_data(paintings, photos)
+    photos = photos[0:7000]
     print(paintings.shape, photos.shape)
     model = train(paintings, photos)
     generate(photos, model)
