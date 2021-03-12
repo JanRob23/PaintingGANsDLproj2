@@ -1,4 +1,13 @@
-from read_data import getData
-
-x, y = getData()
-print(x.shape, y.shape)
+from read_data import getData, read_data
+from jan_GAN.train import train, generate
+import glob
+# x, y = getData()
+# print(x.shape, y.shape)
+paintings = glob.glob("Data/monet_jpg/*jpg")
+def go(filepath_photos, filepath_paintings):
+    photos = glob.glob(filepath_photos)
+    paintings = glob.glob(filepath_paintings)
+    paintings, photos = read_data(paintings, photos)
+    print(paintings.shape, photos.shape)
+    model = train(paintings, photos)
+    generate(photos, model)
