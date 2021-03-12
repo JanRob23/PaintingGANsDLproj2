@@ -49,10 +49,10 @@ class Gan():
         gen = Generator(self.z_dim, self.image_dim).to(self.device)
         
         fixed_noise = torch.randn((self.batch, self.z_dim)).to(self.device)
-        transforms = transforms.Compose(
+        transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.5,),(0.5,))]
         )
-        dataset = datasets.MNIST(root="dataset/", transform=transforms, download=True)
+        dataset = datasets.MNIST(root="dataset/", transform=transform, download=True)
         loader = DataLoader(dataset, self.batch, shuffle=True)
         opt_disc = nn.Adam(disc.parameters(), lr=self.learning_rate)
         opt_gen = nn.Adam(gen.parameters(), lr=self.learning_rate)
@@ -88,9 +88,9 @@ class Gan():
                 opt_gen.step()
 
                 #TensorBoard
-                if batch_idx == 0:
+                if batch_inx == 0:
                     print(
-                        f"Epoch [{epoch}/{num_epochs}] Batch {batch_idx}/{len(loader)} \
+                        f"Epoch [{epoch}/{self.num_epochs}] Batch {batch_inx}/{len(loader)} \
                             Loss D: {lossD:.4f}, loss G: {lossG:.4f}"
                     )
 
