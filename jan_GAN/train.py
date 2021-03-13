@@ -13,8 +13,8 @@ def train(paintings, photos):
     NUM_EPOCHS = 5
     batch_size = 10
 
-    gen = Generator(3, 256)
-    disc = Discriminator(3, 256)
+    gen = Generator(3, 64)
+    disc = Discriminator(3, 64)
     initialize_weights(gen)
     initialize_weights(disc)
 
