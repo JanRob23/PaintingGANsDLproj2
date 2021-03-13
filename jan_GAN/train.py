@@ -10,7 +10,7 @@ from jan_GAN.model import Generator, Discriminator, initialize_weights
 def train(paintings, photos):
     # Hyperparameters etc.
     LEARNING_RATE = 2e-4  # could also use two lrs, one for gen and one for disc
-    NUM_EPOCHS = 30
+    NUM_EPOCHS = 10
     batch_size = 10
 
     gen = Generator(3, 64)

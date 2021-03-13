@@ -20,6 +20,5 @@ def go(filepath_photos, filepath_paintings):
     photos = photos[0:7000]
     print(paintings.shape, photos.shape)
     model = train(paintings, photos)
-    print("now i'm generating")
-    generate(photos, model)
+    return model
 #go("Data/photo_jpg/*jpg", "Data/monet_jpg/*jpg")
