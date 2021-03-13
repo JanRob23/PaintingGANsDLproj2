@@ -22,4 +22,4 @@ def go(filepath_photos, filepath_paintings):
     model = train(paintings, photos)
     print("now i'm generating")
     generate(photos, model)
-#go("Data/monet_jpg/*jpg", "Data/photo_jpg/*jpg")
+#go("Data/photo_jpg/*jpg", "Data/monet_jpg/*jpg")

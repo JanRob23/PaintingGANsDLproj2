@@ -10,7 +10,7 @@ from jan_GAN.model import Generator, Discriminator, initialize_weights
 def train(paintings, photos):
     # Hyperparameters etc.
     LEARNING_RATE = 2e-4  # could also use two lrs, one for gen and one for disc
-    NUM_EPOCHS = 20
+    NUM_EPOCHS = 30
     batch_size = 10
 
     gen = Generator(3, 64)
@@ -69,6 +69,6 @@ def generate(photos, model):
         le_monet = le_monet.reshape(256, 256, 3)
         le_monet = le_monet.detach().cpu().numpy()
         print(le_monet.shape)
-        img = Image.fromarray(le_monet, 'RGB')
-        img.show()
-        imageio.imwrite("content/generated/%d.jpg" % (i,), img)
+        #img = Image.fromarray(le_monet, 'RGB')
+        ##img.show()
+        imageio.imwrite("content/generated/%d.jpg" % (i,), le_monet.astype(np.uint8))
