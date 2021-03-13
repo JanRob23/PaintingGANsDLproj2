@@ -60,6 +60,8 @@ def train(paintings, photos):
 
 def generate(photos, model):
     photos = torch.from_numpy(photos.copy())
+    if torch.cuda.is_available():
+        photos = photos.cuda()
     photos = photos.float()
     photos = photos.reshape(-1, 1, 3, 256, 256)
     for i in range(20):
