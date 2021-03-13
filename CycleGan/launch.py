@@ -54,7 +54,7 @@ def go(monet, photos):
     ph_ds = PhotoDataset('../input/gan-getting-started/photo_jpg/')
     ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
 
-if __name__ == __main__:
+if __name__ == "__main__":
     monet = 'Data/monet_jpg'
     photos = 'Data/photo_jpg'
     go(monet, photos)
