@@ -6,49 +6,55 @@ from utils import *
 from fileIO import *
 from cycleGan import *
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-set_seed(719)
-img_ds = ImageDataset('Data/monet_jpg', 'Data/photo_jpg')
-img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
-photo_img, monet_img = next(iter(img_dl))
-
-gan = CycleGAN(3, 3, 50, device)
-
-save_dict = {
-    'epoch': 0,
-    'gen_mtp': gan.gen_mtp.state_dict(),
-    'gen_ptm': gan.gen_ptm.state_dict(),
-    'desc_m': gan.desc_m.state_dict(),
-    'desc_p': gan.desc_p.state_dict(),
-    'optimizer_gen': gan.adam_gen.state_dict(),
-    'optimizer_desc': gan.adam_desc.state_dict()
-}
-save_checkpoint(save_dict, 'init.ckpt')
-
-gan.train(img_dl)
-
-plt.xlabel("Epochs")
-plt.ylabel("Losses")
-plt.plot(gan.gen_stats.losses, 'r', label='Generator Loss')
-plt.plot(gan.desc_stats.losses, 'b', label='Descriminator Loss')
-plt.legend()
-plt.show()
-
-_, ax = plt.subplots(5, 2, figsize=(12, 12))
-for i in range(5):
-    photo_img, _ = next(iter(img_dl))
-    pred_monet = gan.gen_ptm(photo_img.to(device)).cpu().detach()
-    photo_img = unnorm(photo_img)
-    pred_monet = unnorm(pred_monet)
+def go(monet, photos):
     
-    ax[i, 0].imshow(photo_img[0].permute(1, 2, 0))
-    ax[i, 1].imshow(pred_monet[0].permute(1, 2, 0))
-    ax[i, 0].set_title("Input Photo")
-    ax[i, 1].set_title("Monet-esque Photo")
-    ax[i, 0].axis("off")
-    ax[i, 1].axis("off")
-plt.show()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    set_seed(719)
+    img_ds = ImageDataset('Data/monet_jpg', 'Data/photo_jpg')
+    img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
+    photo_img, monet_img = next(iter(img_dl))
 
-ph_ds = PhotoDataset('../input/gan-getting-started/photo_jpg/')
-ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
+    gan = CycleGAN(3, 3, 50, device)
 
+    save_dict = {
+        'epoch': 0,
+        'gen_mtp': gan.gen_mtp.state_dict(),
+        'gen_ptm': gan.gen_ptm.state_dict(),
+        'desc_m': gan.desc_m.state_dict(),
+        'desc_p': gan.desc_p.state_dict(),
+        'optimizer_gen': gan.adam_gen.state_dict(),
+        'optimizer_desc': gan.adam_desc.state_dict()
+    }
+    save_checkpoint(save_dict, 'init.ckpt')
+
+    gan.train(img_dl)
+
+    plt.xlabel("Epochs")
+    plt.ylabel("Losses")
+    plt.plot(gan.gen_stats.losses, 'r', label='Generator Loss')
+    plt.plot(gan.desc_stats.losses, 'b', label='Descriminator Loss')
+    plt.legend()
+    plt.show()
+
+    _, ax = plt.subplots(5, 2, figsize=(12, 12))
+    for i in range(5):
+        photo_img, _ = next(iter(img_dl))
+        pred_monet = gan.gen_ptm(photo_img.to(device)).cpu().detach()
+        photo_img = unnorm(photo_img)
+        pred_monet = unnorm(pred_monet)
+        
+        ax[i, 0].imshow(photo_img[0].permute(1, 2, 0))
+        ax[i, 1].imshow(pred_monet[0].permute(1, 2, 0))
+        ax[i, 0].set_title("Input Photo")
+        ax[i, 1].set_title("Monet-esque Photo")
+        ax[i, 0].axis("off")
+        ax[i, 1].axis("off")
+    plt.show()
+
+    ph_ds = PhotoDataset('../input/gan-getting-started/photo_jpg/')
+    ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
+
+if __name__ == __main__:
+    monet = 'Data/monet_jpg'
+    photos = 'Data/photo_jpg'
+    go(monet, photos)
