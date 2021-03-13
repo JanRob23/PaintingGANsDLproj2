@@ -10,11 +10,11 @@ from jan_GAN.model import Generator, Discriminator, initialize_weights
 def train(paintings, photos):
     # Hyperparameters etc.
     LEARNING_RATE = 2e-4  # could also use two lrs, one for gen and one for disc
-    NUM_EPOCHS = 5
+    NUM_EPOCHS = 10
     batch_size = 10
 
-    gen = Generator(3, 256)
-    disc = Discriminator(3, 256)
+    gen = Generator(3, 64)
+    disc = Discriminator(3, 64)
     initialize_weights(gen)
     initialize_weights(disc)
 
@@ -32,8 +32,9 @@ def train(paintings, photos):
         disc = disc.cuda()
         photos = photos.cuda()
         paintings = paintings.cuda()
+    print(paintings.shape[0])
     for epoch in tqdm(range(NUM_EPOCHS), desc='Epochs'):
-        for batch in tqdm(range(int(paintings.shape[0]/batch_size)), desc='Bitches'):
+        for batch in tqdm(range(paintings.shape[0]), desc='Bitches'):
             painting = paintings[batch]
             photo = photos[batch]
             fake_painting = gen(photo)
@@ -56,8 +57,18 @@ def train(paintings, photos):
             opt_gen.step()
 
     return gen
+
 def generate(photos, model):
+    photos = torch.from_numpy(photos.copy())
+    if torch.cuda.is_available():
+        photos = photos.cuda()
+    photos = photos.float()
+    photos = photos.reshape(-1, 1, 3, 256, 256)
     for i in range(20):
         le_monet = model(photos[i])
-        img = Image.fromarray(le_monet, 'RGB')
-        imageio.imwrite("content/generated/%d.jpg" % (i,), img.astype(np.uint8))
+        le_monet = le_monet.reshape(256, 256, 3)
+        le_monet = le_monet.detach().cpu().numpy()
+        print(le_monet.shape)
+        #img = Image.fromarray(le_monet, 'RGB')
+        ##img.show()
+        imageio.imwrite("content/generated/%d.jpg" % (i,), le_monet.astype(np.uint8))

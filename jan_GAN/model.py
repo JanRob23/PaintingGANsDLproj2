@@ -30,17 +30,17 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
         self.gen = nn.Sequential(
             # take 256 x 256 photo and downsample to 20 x 20
-            self.block_downsample(in_channels, int(features_gen / 2), 12, 2, 1),    # 124 x 124
-            self.block_downsample(int(features_gen / 2), features_gen, 10, 2, 0),  # 58 x 58
-            self.block_downsample(features_gen, features_gen * 2, 9, 1, 0),  # 50 x 50
-            self.block_downsample(features_gen * 2, features_gen * 3, 6, 2, 0),  # 23 x 23
-            self.block_downsample(features_gen * 3, features_gen * 4, 4, 1, 0),  # 20 x 20
+            self.block_downsample(in_channels, features_gen, 12, 2, 1),    # 124 x 124
+            self.block_downsample(features_gen, features_gen*2, 10, 2, 0),  # 58 x 58
+            self.block_downsample(features_gen*2, features_gen*4, 9, 1, 0),  # 50 x 50
+            self.block_downsample(features_gen * 4, features_gen * 6, 6, 2, 0),  # 23 x 23
+            self.block_downsample(features_gen * 6, features_gen * 8, 4, 1, 0),  # 20 x 20
             # now upsample to 256 x 256 again with same parameters
-            self.block_upsample(features_gen * 4, features_gen * 3, 4, 1, 0),
-            self.block_upsample(features_gen * 3, features_gen * 2, 6, 2, 0),
-            self.block_upsample(features_gen * 2, features_gen, 9, 1, 0),
-            self.block_upsample(features_gen, int(features_gen / 2), 10, 2, 0),
-            nn.ConvTranspose2d(int(features_gen / 2), in_channels, 12, 2, 1),
+            self.block_upsample(features_gen * 8, features_gen * 6, 4, 1, 0),
+            self.block_upsample(features_gen * 6, features_gen * 4, 6, 2, 0),
+            self.block_upsample(features_gen * 4, features_gen*2, 9, 1, 0),
+            self.block_upsample(features_gen*2,features_gen, 10, 2, 0),
+            nn.ConvTranspose2d(features_gen, in_channels, 12, 2, 1),
             nn.Tanh()
         )
 
@@ -68,7 +68,7 @@ def initialize_weights(model):
 def test():
     N, in_channels, H, W = 8, 3, 256, 256
     x = torch.randn((N, in_channels, H, W))
-    disc = Discriminator(in_channels, 8)
+    disc = Discriminator(in_channels, 64)
     assert disc(x).shape == (N, 1, 1, 1), "Discriminator test failed"
     print("disc seems to work biatch")
     gen = Generator(in_channels, 8)
