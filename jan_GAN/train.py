@@ -11,7 +11,7 @@ def train(paintings, photos):
     # Hyperparameters etc.
     LEARNING_RATE = 2e-4  # could also use two lrs, one for gen and one for disc
     NUM_EPOCHS = 10
-    batch_size = 10
+    batch_size = 1
 
     gen = Generator(3, 64)
     disc = Discriminator(3, 64)
@@ -55,6 +55,8 @@ def train(paintings, photos):
             gen.zero_grad()
             loss_gen.backward()
             opt_gen.step()
+        print("Loss of disc this epoch: ", loss_disc)
+        print("Loss of gen this epoch: ", loss_gen)
 
     return gen
 
