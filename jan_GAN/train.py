@@ -55,9 +55,9 @@ def train(paintings, photos):
             gen.zero_grad()
             loss_gen.backward()
             opt_gen.step()
-        print("Loss of disc this epoch: ", loss_disc)
-        print("Loss of gen this epoch: ", loss_gen)
-
+        print("Loss of disc this epoch: " + str(loss_disc.detach().cpu().numpy()))
+        print("Loss of gen this epoch: " + str(loss_gen.detach().cpu().numpy()))
+        print("-------------------------")
     return gen
 
 def generate(photos, model):
