@@ -17,7 +17,7 @@ def go(filepath_photos, filepath_paintings):
     paintings = glob.glob(filepath_paintings)
     print(filepath_paintings, filepath_photos)
     paintings, photos = read_data(paintings, photos)
-    photos = photos[0:7000]
+    photos = photos[0:500]
     print(paintings.shape, photos.shape)
     model = train(paintings, photos)
     return model
