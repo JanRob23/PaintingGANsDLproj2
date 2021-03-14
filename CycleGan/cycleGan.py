@@ -123,6 +123,8 @@ class CycleGAN(object):
         self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.adam_desc, desc_lr.step)
         self.gen_stats = AvgStats()
         self.desc_stats = AvgStats()
+        self.epoch = 0
+        self.training_range = range(self.epoch ,self.epochs)
         
     def init_models(self):
         init_weights(self.gen_mtp)
@@ -133,9 +135,19 @@ class CycleGAN(object):
         self.gen_ptm = self.gen_ptm.to(self.device)
         self.desc_m = self.desc_m.to(self.device)
         self.desc_p = self.desc_p.to(self.device)
+    
+    def load_model(self, ckpt):
+        self.epoch = ckpt['epoch']
+        self.gen_mtp.load_state_dict(ckpt['gen_mtp'])
+        self.gen_ptm.load_state_dict(ckpt['gen_ptm'])
+        self.desc_m.load_state_dict(ckpt['desc_m'])
+        self.desc_p.load_state_dict(ckpt['desc_p'])
+        self.adam_gen.load_state_dict(ckpt['optimizer_gen'])
+        self.adam_desc.load_state_dict(ckpt['optimizer_desc'])
         
     def train(self, photo_dl):
-        for epoch in range(self.epochs):
+        for epoch in self.training_range:
+            self.epoch = epoch
             start_time = time.time()
             avg_gen_loss = 0.0
             avg_desc_loss = 0.0
