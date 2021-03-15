@@ -4,6 +4,7 @@ from imgaug import augmenters as iaa
 from numpy import asarray
 from PIL import Image
 from tqdm.notebook import tqdm
+#from tqdm import tqdm
 import glob
 
 

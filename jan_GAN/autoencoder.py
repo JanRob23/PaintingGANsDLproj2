@@ -4,6 +4,7 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 from tqdm.notebook import tqdm
+#from tqdm import tqdm
 import os
 
 
@@ -12,20 +13,20 @@ class autoencoder(nn.Module):
         super(autoencoder, self).__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 32, 16, 3, 0), # 81
-            nn.ReLU(True),
+            nn.Tanh(),
             nn.MaxPool2d(3, 2), # 40
-            nn.Conv2d(32, 16, 6, 2, 0), # 18
-            nn.ReLU(True),
+            nn.Conv2d(32, 64, 6, 2, 0), # 18
+            nn.Tanh(),
             nn.MaxPool2d(3, 1) # 16
         )
 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(16, 32, kernel_size=3, stride=2, padding=1), #31
-            nn.ReLU(True),
+            nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1), #31
+            nn.Tanh(),
             nn.ConvTranspose2d(32, 16, 4, 2, 1), # 62
-            nn.ReLU(True),
+            nn.Tanh(),
             nn.ConvTranspose2d(16, 8, 4, 2, 0), #126
-            nn.ReLU(True),
+            nn.Tanh(),
             nn.ConvTranspose2d(8, 3, 6, 2, 0), # 256
             nn.Tanh()
         )
@@ -54,6 +55,7 @@ def train_autoencoder(monet_images):
     for epoch in tqdm(range(num_epochs), desc='epochs'):
         for batch in range(monet_images.shape[0]):
             img = monet_images[batch]
+            img = img / 255
             if torch.cuda.is_available():
                 img = Variable(img).cuda()
             # ===================forward=====================
