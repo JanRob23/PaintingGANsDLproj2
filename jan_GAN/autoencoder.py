@@ -28,7 +28,7 @@ class autoencoder(nn.Module):
             nn.ConvTranspose2d(16, 8, 4, 2, 0), #126
             nn.Tanh(),
             nn.ConvTranspose2d(8, 3, 6, 2, 0), # 256
-            nn.Tanh()
+            nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -37,9 +37,9 @@ class autoencoder(nn.Module):
         return x
 
 def train_autoencoder(monet_images):
-    num_epochs = 300
+    num_epochs = 50
     batch_size = 10
-    learning_rate = 2e-5
+    learning_rate = 2e-4
     model = autoencoder()
     monet_images = torch.from_numpy(monet_images.copy())
     monet_images = monet_images.reshape(-1, batch_size, 3, 256, 256)
