@@ -27,17 +27,20 @@ class ImageDataset(Dataset):
             ])
         for i, fl in enumerate(os.listdir(self.monet_dir)):
             self.monet_idx[i] = fl
-        for i, fl in enumerate(os.listdir(self.photo_dir)):
+        for i, fl in enumerate(sorted(os.listdir(self.photo_dir))):
             self.photo_idx[i] = fl
+        self.idx = 1
+        self.range = len(self.monet_idx.keys())
 
     def __getitem__(self, idx):
         rand_idx = int(np.random.uniform(0, len(self.monet_idx.keys())))
         photo_path = os.path.join(self.photo_dir, self.photo_idx[rand_idx])
         monet_path = os.path.join(self.monet_dir, self.monet_idx[idx])
-        photo_img = Image.open(photo_path)
+        photo_img = Image.open(f'Data/photo_jpg/photo{self.idx} .jpg')
         photo_img = self.transform(photo_img)
         monet_img = Image.open(monet_path)
         monet_img = self.transform(monet_img)
+        self.idx +=1
         return photo_img, monet_img
 
     def __len__(self):
@@ -67,13 +70,15 @@ class PhotoDataset(Dataset):
                 transforms.Resize(size),
                 transforms.ToTensor()                               
             ])
-        for i, fl in enumerate(os.listdir(self.photo_dir)):
+        for i, fl in enumerate(sorted(os.listdir(self.photo_dir))):
             self.photo_idx[i] = fl
-
+        self.idx = 1
     def __getitem__(self, idx):
         photo_path = os.path.join(self.photo_dir, self.photo_idx[idx])
-        photo_img = Image.open(photo_path)
+        #photo_img = Image.open(photo_path)
+        photo_img = Image.open(f'Data/photo_jpg/photo{self.idx} .jpg')
         photo_img = self.transform(photo_img)
+        self.idx +=1
         return photo_img
 
     def __len__(self):

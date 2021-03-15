@@ -1,6 +1,8 @@
 # Data files
 /Data
 /CycleGan/Data
+/CycleGan/current.ckpt
+/CycleGan/images
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
