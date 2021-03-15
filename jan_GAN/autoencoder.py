@@ -32,14 +32,13 @@ class autoencoder(nn.Module):
 
     def forward(self, x):
         x = self.encoder(x)
-        print(x.shape)
         x = self.decoder(x)
         return x
 
 def train_autoencoder(monet_images):
-    num_epochs = 40
+    num_epochs = 300
     batch_size = 10
-    learning_rate = 2e-4
+    learning_rate = 2e-5
     model = autoencoder()
     monet_images = torch.from_numpy(monet_images.copy())
     monet_images = monet_images.reshape(-1, batch_size, 3, 256, 256)
@@ -67,7 +66,7 @@ def train_autoencoder(monet_images):
         # ===================log========================
         total_loss += loss.data
         print('epoch [{}/{}], loss:{:.4f}'
-              .format(epoch+1, num_epochs, total_loss))
+              .format(epoch+1, num_epochs, loss.data))
         # if epoch % 10 == 0:
         #     pic = to_img(output.cpu().data)
         #     save_image(pic, './dc_img/image_{}.png'.format(epoch))
