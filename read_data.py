@@ -3,7 +3,7 @@ import imageio
 from imgaug import augmenters as iaa
 from numpy import asarray
 from PIL import Image
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 import glob
 
 
