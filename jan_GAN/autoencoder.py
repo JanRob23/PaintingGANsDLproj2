@@ -40,24 +40,25 @@ class complex_autoencoder(nn.Module):
     def __init__(self):
         super(complex_autoencoder, self).__init__()
         self.encoder = nn.Sequential(
-            nn.Conv2d(3, 32, 14, 2, 4), # 124
+            nn.Conv2d(3, 64, 17, 1, 0), # 256 - 17 + 1 -> 240
             nn.Tanh(),
-            nn.MaxPool2d(6, 2), # 60
-            nn.Conv2d(32, 64, 7, 1, 0), # 54
+            nn.MaxPool2d(5, 2), # 240 - 6 / 2 + 1 -> 119
+            nn.Conv2d(64, 128, 6, 1, 0), # 119 - 6 + 1 -> 114
             nn.Tanh(),
-            nn.MaxPool2d(4, 2) # 26
+            nn.MaxPool2d(4, 2), # 114 -4 /2 + 1 -> 56
+            nn.ConvTranspose2d(128, 256, 6, 2), # 56 - 6 / 2 + 1 -> 26
         )
 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2), #54
+            nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2), #54
             nn.Tanh(),
-            nn.ConvTranspose2d(32, 16, 4, 2), # 110
+            nn.ConvTranspose2d(128, 64, 4, 2), # 110
             nn.Tanh(),
-            nn.ConvTranspose2d(16, 10, 6, 2, 0), #226
+            nn.ConvTranspose2d(64, 32, 6, 2, 0), #226
             nn.Tanh(),
-            nn.ConvTranspose2d(10, 8, 16, 1), #241
+            nn.ConvTranspose2d(32, 16, 16, 1), #241
             nn.Tanh(),
-            nn.ConvTranspose2d(8, 3, 18, 1), #256
+            nn.ConvTranspose2d(16, 3, 18, 1), #256
             nn.Sigmoid()
         )
 
@@ -68,7 +69,7 @@ class complex_autoencoder(nn.Module):
 
 def train_autoencoder(monet_images):
     num_epochs = 30
-    batch_size = 50
+    batch_size = 20
     learning_rate = 2e-4
     model = complex_autoencoder()
     monet_images = monet_images / 255
@@ -83,7 +84,6 @@ def train_autoencoder(monet_images):
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
                                  weight_decay=1e-5)
     total_loss = 0
-    print(monet_images[0])
     for epoch in tqdm(range(num_epochs), desc='epochs'):
         for batch in range(monet_images.shape[0]):
             img = monet_images[batch]
@@ -96,6 +96,7 @@ def train_autoencoder(monet_images):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
         # ===================log========================
         total_loss += loss.data
         print('epoch [{}/{}], loss:{:.4f}'
