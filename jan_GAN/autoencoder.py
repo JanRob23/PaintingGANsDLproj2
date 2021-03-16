@@ -2,9 +2,9 @@
 
 import torch
 from torch import nn
-from torch.autograd import Variable
+#from torch.autograd import Variable
 from tqdm.notebook import tqdm
-#from tqdm import tqdm
+from tqdm import tqdm
 import os
 
 
@@ -42,11 +42,12 @@ class complex_autoencoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, 17, 1, 0), # 256 - 17 + 1 -> 240
             nn.Tanh(),
-            nn.MaxPool2d(5, 2), # 240 - 6 / 2 + 1 -> 119
+            nn.MaxPool2d(6, 2), # 240 - 6 / 2 + 1 -> 119
             nn.Conv2d(64, 128, 6, 1, 0), # 119 - 6 + 1 -> 114
             nn.Tanh(),
             nn.MaxPool2d(4, 2), # 114 -4 /2 + 1 -> 56
-            nn.ConvTranspose2d(128, 256, 6, 2), # 56 - 6 / 2 + 1 -> 26
+            nn.Conv2d(128, 256, 4, 2), # 56 - 6 / 2 + 1 -> 26
+            nn.Tanh()
         )
 
         self.decoder = nn.Sequential(
