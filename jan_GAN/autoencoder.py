@@ -41,6 +41,7 @@ def train_autoencoder(monet_images):
     batch_size = 10
     learning_rate = 2e-4
     model = autoencoder()
+    monet_images = monet_images / 255
     monet_images = torch.from_numpy(monet_images.copy())
     monet_images = monet_images.reshape(-1, batch_size, 3, 256, 256)
     monet_images = monet_images.float()
@@ -52,14 +53,16 @@ def train_autoencoder(monet_images):
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
                                  weight_decay=1e-5)
     total_loss = 0
+    print(monet_images[0])
     for epoch in tqdm(range(num_epochs), desc='epochs'):
         for batch in range(monet_images.shape[0]):
             img = monet_images[batch]
-            img = img / 255
             if torch.cuda.is_available():
                 img = Variable(img).cuda()
             # ===================forward=====================
             output = model(img)
+            print(output.shape)
+            print(img.shape)
             loss = criterion(output, img)
             # ===================backward====================
             optimizer.zero_grad()
