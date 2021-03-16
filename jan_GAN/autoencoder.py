@@ -2,9 +2,9 @@
 
 import torch
 from torch import nn
-#from torch.autograd import Variable
+from torch.autograd import Variable
 from tqdm.notebook import tqdm
-from tqdm import tqdm
+#from tqdm import tqdm
 import os
 
 
