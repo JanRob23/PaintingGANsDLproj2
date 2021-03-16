@@ -19,4 +19,4 @@ def go_autoencoder(filepath_monet):
     paintings, _ = read_data(paintings, [])
     model = train_autoencoder(paintings)
     return model
-#go_autoencoder("Data/monet_jpg/*jpg")
+go_autoencoder("Data/monet_jpg/*jpg")
