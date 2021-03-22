@@ -14,7 +14,7 @@ def go(monet, photos):
     img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
-    gan = CycleGAN(3, 3, 50, device)
+    gan = CycleGAN(3, 3, 10, device)
 
     save_dict = {
         'epoch': 0,
@@ -51,7 +51,7 @@ def go(monet, photos):
         ax[i, 1].axis("off")
     plt.show()
 
-    ph_ds = PhotoDataset('../input/gan-getting-started/photo_jpg/')
+    ph_ds = PhotoDataset('../content/data/')
     ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
 
 if __name__ == "__main__":
