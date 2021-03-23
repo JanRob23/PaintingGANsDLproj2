@@ -70,7 +70,7 @@ class complex_autoencoder(nn.Module):
 
 def train_autoencoder(monet_images):
     num_epochs = 30
-    batch_size = 20
+    batch_size = 1
     learning_rate = 2e-4
     model = complex_autoencoder()
     monet_images = monet_images / 255
@@ -86,7 +86,7 @@ def train_autoencoder(monet_images):
                                  weight_decay=1e-5)
     total_loss = 0
     for epoch in tqdm(range(num_epochs), desc='epochs'):
-        for batch in range(monet_images.shape[0]):
+        for batch in tqdm(range(monet_images.shape[0])):
             img = monet_images[batch]
             if torch.cuda.is_available():
                 img = Variable(img).cuda()
@@ -99,9 +99,9 @@ def train_autoencoder(monet_images):
             optimizer.step()
 
         # ===================log========================
-        total_loss += loss.data
-        print('epoch [{}/{}], loss:{:.4f}'
-              .format(epoch+1, num_epochs, loss.data))
+        # total_loss += loss.data
+        # print('epoch [{}/{}], loss:{:.4f}'
+        #       .format(epoch+1, num_epochs, loss.data))
         # if epoch % 10 == 0:
         #     pic = to_img(output.cpu().data)
         #     save_image(pic, './dc_img/image_{}.png'.format(epoch))
