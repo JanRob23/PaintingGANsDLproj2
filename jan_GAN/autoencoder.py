@@ -86,7 +86,7 @@ def train_autoencoder(monet_images):
                                  weight_decay=1e-5)
     total_loss = 0
     for epoch in tqdm(range(num_epochs), desc='epochs'):
-        for batch in range(monet_images.shape[0]):
+        for batch in tqdm(range(monet_images.shape[0])):
             img = monet_images[batch]
             if torch.cuda.is_available():
                 img = Variable(img).cuda()
