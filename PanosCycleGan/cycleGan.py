@@ -135,7 +135,6 @@ class CycleGAN(object):
         self.desc_p = self.desc_p.to(self.device)
         
     def train(self, photo_dl):
-        ncritic= 5
         for epoch in range(self.epochs):
             start_time = time.time()
             avg_gen_loss = 0.0
