@@ -70,7 +70,7 @@ class complex_autoencoder(nn.Module):
 
 def train_autoencoder(monet_images):
     num_epochs = 30
-    batch_size = 20
+    batch_size = 1
     learning_rate = 2e-4
     model = complex_autoencoder()
     monet_images = monet_images / 255
