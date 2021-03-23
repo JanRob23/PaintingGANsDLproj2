@@ -47,7 +47,7 @@ class Discriminator(nn.Module):
         model = list()
         model.append(nn.Conv2d(in_ch, 64, 4, stride=2, padding=1))
         #model.append(nn.LeakyReLU(0.2, inplace=True))
-        for i in range(1, num_layes):
+        for i in range(1, num_layers):
             in_chs = 64 * 2**(i-1)
             out_chs = in_chs * 2
             if i == num_layers -1:
