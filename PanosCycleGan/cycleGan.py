@@ -213,9 +213,15 @@ class CycleGAN(object):
                 avg_desc_loss += total_desc_loss.item()
 
                 # Backward
+                clip= 0.01
                 monet_desc_loss.backward()
                 photo_desc_loss.backward()
                 self.RMSprop_desc.step()
+                for p in self.desc_m.parameters():
+
+                    p.data.clamp_(-clip,clip)
+                for p in self.desc_p.parameters():
+                    p.data.clamp_(-clip, clip)
                 
                 t.set_postfix(gen_loss=total_gen_loss.item(), desc_loss=total_desc_loss.item())
 
