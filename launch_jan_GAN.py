@@ -15,9 +15,9 @@ def go(filepath_photos, filepath_paintings):
 #go("Data/photo_jpg/*jpg", "Data/monet_jpg/*jpg")
 
 def go_autoencoder(filepath_monet):
-    paintings = glob.glob(filepath_monet)
-    paintings, _ = read_data(paintings, [])
-    paintings = paintings[0:7000]
-    model = train_autoencoder(paintings)
+    # paintings = glob.glob(filepath_monet)
+    # paintings, _ = read_data(paintings, [])
+    # paintings = paintings[0:7000]
+    model = train_autoencoder(filepath_monet)
     return model
-go_autoencoder("Data/monet_jpg/*jpg")
+#go_autoencoder("Data/monet_jpg/*jpg")
