@@ -46,8 +46,8 @@ class Discriminator(nn.Module):
         super().__init__()
         model = list()
         model.append(nn.Conv2d(in_ch, 64, 4, stride=2, padding=1))
-        model.append(nn.LeakyReLU(0.2, inplace=True))
-        for i in range(1, num_layers):
+        #model.append(nn.LeakyReLU(0.2, inplace=True))
+        for i in range(1, num_layes):
             in_chs = 64 * 2**(i-1)
             out_chs = in_chs * 2
             if i == num_layers -1:
@@ -113,14 +113,14 @@ class CycleGAN(object):
         self.l1_loss = nn.L1Loss()
         self.adam_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
                                          lr = start_lr, betas=(0.5, 0.999))
-        self.adam_desc = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
+        self.RMSProp = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
                                           lr=start_lr, betas=(0.5, 0.999))
         self.sample_monet = sample_fake()
         self.sample_photo = sample_fake()
         gen_lr = lr_sched(self.decay_epoch, self.epochs)
         desc_lr = lr_sched(self.decay_epoch, self.epochs)
         self.gen_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.adam_gen, gen_lr.step)
-        self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.adam_desc, desc_lr.step)
+        self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSProp, desc_lr.step)
         self.gen_stats = AvgStats()
         self.desc_stats = AvgStats()
         
@@ -135,6 +135,7 @@ class CycleGAN(object):
         self.desc_p = self.desc_p.to(self.device)
         
     def train(self, photo_dl):
+        ncritic= 5
         for epoch in range(self.epochs):
             start_time = time.time()
             avg_gen_loss = 0.0
@@ -143,19 +144,20 @@ class CycleGAN(object):
             for i, (photo_real, monet_real) in enumerate(t):
                 photo_img, monet_img = photo_real.to(self.device), monet_real.to(self.device)
                 update_req_grad([self.desc_m, self.desc_p], False)
-                self.adam_gen.zero_grad()
+                self.RMSProp.zero_grad()
 
-                # Forward pass through generator
+                #Forward pass through generator
                 fake_photo = self.gen_mtp(monet_img)
                 fake_monet = self.gen_ptm(photo_img)
 
-                cycl_monet = self.gen_ptm(fake_photo)
-                cycl_photo = self.gen_mtp(fake_monet)
+                cycl_monet = self.gen_ptm(fake_photo) #
+                cycl_photo = self.gen_mtp(fake_monet) #
 
                 id_monet = self.gen_ptm(monet_img)
                 id_photo = self.gen_mtp(photo_img)
 
                 # generator losses - identity, Adversarial, cycle consistency
+
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
@@ -179,11 +181,11 @@ class CycleGAN(object):
 
                 # backward pass
                 total_gen_loss.backward()
-                self.adam_gen.step()
+                self.RMSProp.step()
 
                 # Forward pass through Descriminator
                 update_req_grad([self.desc_m, self.desc_p], True)
-                self.adam_desc.zero_grad()
+                self.RMSProp.zero_grad()
 
                 fake_monet = self.sample_monet([fake_monet.cpu().data.numpy()])[0]
                 fake_photo = self.sample_photo([fake_photo.cpu().data.numpy()])[0]
