@@ -51,8 +51,23 @@ def go(monet, photos):
         ax[i, 1].axis("off")
     plt.show()
 
-    ph_ds = PhotoDataset('../content/data/')
+    ph_ds = PhotoDataset('../content/data/photos')
     ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
+
+    trans = transforms.ToPILImage()
+    ###Save images
+    if os.path.isfile('current.ckpt'):
+        if device == 'cpu':
+            t = cputqdm(ph_dl, leave=False, total=ph_dl.__len__())
+        else:
+            t = tqdm(ph_dl, leave=False, total=ph_dl.__len__())
+
+    for i, photo in enumerate(t):
+        with torch.no_grad():
+            pred_monet = gan.gen_ptm(photo.to(device)).cpu().detach()
+        pred_monet = unnorm(pred_monet)
+        img = trans(pred_monet[0]).convert("RGB")
+        img.save("Data/customMonet/" + str(i + 1) + ".jpg")
 
 if __name__ == "__main__":
     monet = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/augs'
