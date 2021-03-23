@@ -99,9 +99,9 @@ def train_autoencoder(monet_images):
             optimizer.step()
 
         # ===================log========================
-        total_loss += loss.data
-        print('epoch [{}/{}], loss:{:.4f}'
-              .format(epoch+1, num_epochs, loss.data))
+        # total_loss += loss.data
+        # print('epoch [{}/{}], loss:{:.4f}'
+        #       .format(epoch+1, num_epochs, loss.data))
         # if epoch % 10 == 0:
         #     pic = to_img(output.cpu().data)
         #     save_image(pic, './dc_img/image_{}.png'.format(epoch))
