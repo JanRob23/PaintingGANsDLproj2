@@ -111,16 +111,16 @@ class CycleGAN(object):
         self.init_models()
         self.mse_loss = nn.MSELoss()
         self.l1_loss = nn.L1Loss()
-        self.adam_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
-                                         lr = start_lr, betas=(0.5, 0.999))
-        self.RMSProp = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
-                                          lr=start_lr, betas=(0.5, 0.999))
+        self.RMSprop_gen = torch.optim.RMSprop(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
+                                         lr = start_lr)
+        self.RMSprop_desc = torch.optim.RMSprop(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
+                                          lr=start_lr)
         self.sample_monet = sample_fake()
         self.sample_photo = sample_fake()
         gen_lr = lr_sched(self.decay_epoch, self.epochs)
         desc_lr = lr_sched(self.decay_epoch, self.epochs)
-        self.gen_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.adam_gen, gen_lr.step)
-        self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSProp, desc_lr.step)
+        self.gen_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSprop_gen, gen_lr.step)
+        self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSprop_desc, desc_lr.step)
         self.gen_stats = AvgStats()
         self.desc_stats = AvgStats()
         
@@ -144,7 +144,7 @@ class CycleGAN(object):
             for i, (photo_real, monet_real) in enumerate(t):
                 photo_img, monet_img = photo_real.to(self.device), monet_real.to(self.device)
                 update_req_grad([self.desc_m, self.desc_p], False)
-                self.RMSProp.zero_grad()
+                self.RMSprop_gen.zero_grad()
 
                 #Forward pass through generator
                 fake_photo = self.gen_mtp(monet_img)
@@ -181,11 +181,11 @@ class CycleGAN(object):
 
                 # backward pass
                 total_gen_loss.backward()
-                self.RMSProp.step()
+                self.RMSprop_gen.step()
 
                 # Forward pass through Descriminator
                 update_req_grad([self.desc_m, self.desc_p], True)
-                self.RMSProp.zero_grad()
+                self.RMSprop_desc.zero_grad()
 
                 fake_monet = self.sample_monet([fake_monet.cpu().data.numpy()])[0]
                 fake_photo = self.sample_photo([fake_photo.cpu().data.numpy()])[0]
@@ -215,7 +215,7 @@ class CycleGAN(object):
                 # Backward
                 monet_desc_loss.backward()
                 photo_desc_loss.backward()
-                self.adam_desc.step()
+                self.RMSprop_desc.step()
                 
                 t.set_postfix(gen_loss=total_gen_loss.item(), desc_loss=total_desc_loss.item())
 
@@ -225,8 +225,8 @@ class CycleGAN(object):
                 'gen_ptm': self.gen_ptm.state_dict(),
                 'desc_m': self.desc_m.state_dict(),
                 'desc_p': self.desc_p.state_dict(),
-                'optimizer_gen': self.adam_gen.state_dict(),
-                'optimizer_desc': self.adam_desc.state_dict()
+                'optimizer_gen': self.RMSprop_gen.state_dict(),
+                'optimizer_desc': self.RMSprop_desc.state_dict()
             }
             save_checkpoint(save_dict, 'current.ckpt')
             

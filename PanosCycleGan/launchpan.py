@@ -22,8 +22,8 @@ def go(monet, photos):
         'gen_ptm': gan.gen_ptm.state_dict(),
         'desc_m': gan.desc_m.state_dict(),
         'desc_p': gan.desc_p.state_dict(),
-        'optimizer_gen': gan.adam_gen.state_dict(),
-        'optimizer_desc': gan.adam_desc.state_dict()
+        'optimizer_gen': gan.RMSprop_gen.state_dict(),
+        'optimizer_desc': gan.RMSprop_desc.state_dict()
     }
     save_checkpoint(save_dict, 'init.ckpt')
 
@@ -55,6 +55,6 @@ def go(monet, photos):
     ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
 
 if __name__ == "__main__":
-    #monet = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/augs'
-    #photos = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/photo_jpg'
+    monet = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/augs'
+    photos = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/photo_jpg'
     go(monet, photos)
