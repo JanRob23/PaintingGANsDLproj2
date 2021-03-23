@@ -213,7 +213,7 @@ class CycleGAN(object):
 
                 # Backward
                 #Weight clip value : play around with it :)
-                clip= 0.01
+                clip= 0.1
                 monet_desc_loss.backward()
                 photo_desc_loss.backward()
                 self.RMSprop_desc.step()
