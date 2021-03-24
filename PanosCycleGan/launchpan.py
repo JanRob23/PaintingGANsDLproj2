@@ -62,7 +62,7 @@ def go(monet, photos):
         else:
             t = tqdm(ph_dl, leave=False, total=ph_dl.__len__())
 
-    mkdir 'content/data/customMonet/'
+
     for i, photo in enumerate(t):
         with torch.no_grad():
             pred_monet = gan.gen_ptm(photo.to(device)).cpu().detach()
