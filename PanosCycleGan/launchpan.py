@@ -62,12 +62,13 @@ def go(monet, photos):
         else:
             t = tqdm(ph_dl, leave=False, total=ph_dl.__len__())
 
+    mkdir 'content/data/customMonet/'
     for i, photo in enumerate(t):
         with torch.no_grad():
             pred_monet = gan.gen_ptm(photo.to(device)).cpu().detach()
         pred_monet = unnorm(pred_monet)
         img = trans(pred_monet[0]).convert("RGB")
-        img.save('content/data/customMonet/' + str(i + 1) + '.jpg')
+        img.save('content/PaintingGANs_DL_proj2/PanosCycleGan/customMonet' + str(i + 1) + '.jpg')
 
 if __name__ == "__main__":
     monet = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/augs'
