@@ -243,14 +243,13 @@ class CycleGAN(object):
 
                 # Backward
                 #Weight clip value : play around with it :)
-                clip= 0.01
+                clip= 0.05
                 monet_desc_loss.backward()
                 photo_desc_loss.backward()
                 self.RMSprop_desc.step()
 
                 #Clip both discriminator's weight to the given clipping value
                 for p in self.desc_m.parameters():
-
                     p.data.clamp_(-clip,clip)
                 for p in self.desc_p.parameters():
                     p.data.clamp_(-clip, clip)
