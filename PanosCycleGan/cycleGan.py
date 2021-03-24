@@ -46,7 +46,7 @@ class Discriminator(nn.Module):
         super().__init__()
         model = list()
         model.append(nn.Conv2d(in_ch, 64, 4, stride=2, padding=1))
-        #model.append(nn.LeakyReLU(0.2, inplace=True))
+        model.append(nn.LeakyReLU(0.2, inplace=True))
         for i in range(1, num_layers):
             in_chs = 64 * 2**(i-1)
             out_chs = in_chs * 2
@@ -59,6 +59,22 @@ class Discriminator(nn.Module):
 
     def forward(self, x):
         return self.disc(x)
+
+class WassersteinGANLoss(nn.Module):
+    """WassersteinGANLoss
+    ref: Wasserstein GAN (https://arxiv.org/abs/1701.07875)
+    """
+    def __init__(self):
+        super(WassersteinGANLoss, self).__init__()
+
+    def __call__(self, fake, real=None, generator_loss=True):
+        if generator_loss:
+            wloss = fake.mean()
+        else:
+            wloss = real.mean() - fake.mean()
+        return wloss
+
+
 
 def Upsample(in_ch, out_ch, use_dropout=True, dropout_ratio=0.5):
     if use_dropout:
@@ -123,7 +139,8 @@ class CycleGAN(object):
         self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSprop_desc, desc_lr.step)
         self.gen_stats = AvgStats()
         self.desc_stats = AvgStats()
-        
+        self.WassLoss = WassersteinGANLoss()
+
     def init_models(self):
         init_weights(self.gen_mtp)
         init_weights(self.gen_ptm)
@@ -156,6 +173,7 @@ class CycleGAN(object):
                 id_photo = self.gen_mtp(photo_img)
 
                 # generator losses - identity, Adversarial, cycle consistency
+                #cycle consistency loss is left as Standard GAN
 
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
@@ -168,8 +186,13 @@ class CycleGAN(object):
 
                 real = torch.ones(monet_desc.size()).to(self.device)
 
-                adv_loss_monet = self.mse_loss(monet_desc, real)
-                adv_loss_photo = self.mse_loss(photo_desc, real)
+                #####Standard adv losses
+                #adv_loss_monet = self.mse_loss(monet_desc, real)
+                #adv_loss_photo = self.mse_loss(photo_desc, real)
+
+                #######WASSENSTEIN GAN LOSSES!
+                adv_loss_monet = self.WassLoss(monet_desc,real=None,generator_loss=True)
+                adv_loss_photo = self.WassLoss(photo_desc,real=None,generator_loss=True)
 
                 # total generator loss
                 total_gen_loss = cycle_loss_monet + adv_loss_monet\
@@ -201,19 +224,26 @@ class CycleGAN(object):
 
                 # Descriminator losses
                 # --------------------
-                monet_desc_real_loss = self.mse_loss(monet_desc_real, real)
-                monet_desc_fake_loss = self.mse_loss(monet_desc_fake, fake)
-                photo_desc_real_loss = self.mse_loss(photo_desc_real, real)
-                photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
 
-                monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
-                photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
+                #modify to wassenstein gan loss
+
+                #monet_desc_real_loss = self.mse_loss(monet_desc_real, real)
+                #monet_desc_fake_loss = self.mse_loss(monet_desc_fake, fake)
+                #photo_desc_real_loss = self.mse_loss(photo_desc_real, real)
+                #photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
+
+                #Wassenstein loss for critics
+                monet_desc_loss = self.WassLoss(monet_desc_fake,monet_desc_real,generator_loss = False)
+                photo_desc_loss = self.WassLoss(photo_desc_fake,photo_desc_real,generator_loss=False)
+
+                ##monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
+                ##photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
                 total_desc_loss = monet_desc_loss + photo_desc_loss
                 avg_desc_loss += total_desc_loss.item()
 
                 # Backward
                 #Weight clip value : play around with it :)
-                clip= 0.1
+                clip= 0.01
                 monet_desc_loss.backward()
                 photo_desc_loss.backward()
                 self.RMSprop_desc.step()
