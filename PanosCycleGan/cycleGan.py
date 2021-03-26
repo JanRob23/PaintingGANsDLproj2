@@ -160,9 +160,55 @@ class CycleGAN(object):
             t = tqdm(photo_dl, leave=False, total=photo_dl.__len__())
             for i, (photo_real, monet_real) in enumerate(t):
                 photo_img, monet_img = photo_real.to(self.device), monet_real.to(self.device)
+                update_req_grad([self.desc_m, self.desc_p], False)
+                self.RMSprop_gen.zero_grad()
 
+                #Forward pass through generator
+                fake_photo = self.gen_mtp(monet_img)
+                fake_monet = self.gen_ptm(photo_img)
+
+                cycl_monet = self.gen_ptm(fake_photo) #
+                cycl_photo = self.gen_mtp(fake_monet) #
+
+                id_monet = self.gen_ptm(monet_img)
+                id_photo = self.gen_mtp(photo_img)
+
+                # generator losses - identity, Adversarial, cycle consistency
+                #cycle consistency loss is left as Standard GAN
+
+                #might not be needed
+                idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
+                idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
+
+                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * self.lmbda
+                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * self.lmbda
+
+                monet_desc = self.desc_m(fake_monet)
+                photo_desc = self.desc_p(fake_photo)
+
+                real = torch.ones(monet_desc.size()).to(self.device)
+
+                #####Standard adv losses
+                #adv_loss_monet = self.mse_loss(monet_desc, real)
+                #adv_loss_photo = self.mse_loss(photo_desc, real)
+
+                #######WASSENSTEIN GAN LOSSES!
+                adv_loss_monet = self.WassLoss(monet_desc,real=None,generator_loss=True)
+                adv_loss_photo = self.WassLoss(photo_desc,real=None,generator_loss=True)
+
+                # total generator loss
+                total_gen_loss = cycle_loss_monet - adv_loss_monet\
+                              + cycle_loss_photo -adv_loss_photo\
+                              + idt_loss_monet + idt_loss_photo
+                
+                avg_gen_loss += total_gen_loss.item()
+
+                # backward pass
+                total_gen_loss.backward()
+                self.RMSprop_gen.step()
+
+                # Forward pass through Descriminator
                 for _ in range(5):
-
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.RMSprop_desc.zero_grad()
 
@@ -210,61 +256,6 @@ class CycleGAN(object):
                         p.data.clamp_(-clip, clip)
                     for p in self.desc_p.parameters():
                         p.data.clamp_(-clip, clip)
-
-
-
-
-
-
-                update_req_grad([self.desc_m, self.desc_p], False)
-
-                self.RMSprop_gen.zero_grad()
-
-                #Forward pass through generator
-                fake_photo = self.gen_mtp(monet_img)
-                fake_monet = self.gen_ptm(photo_img)
-
-                cycl_monet = self.gen_ptm(fake_photo) #
-                cycl_photo = self.gen_mtp(fake_monet) #
-
-                id_monet = self.gen_ptm(monet_img)
-                id_photo = self.gen_mtp(photo_img)
-
-                # generator losses - identity, Adversarial, cycle consistency
-                #cycle consistency loss is left as Standard GAN
-
-                #might not be needed
-                idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
-                idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
-
-                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * self.lmbda
-                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * self.lmbda
-
-                monet_desc = self.desc_m(fake_monet)
-                photo_desc = self.desc_p(fake_photo)
-
-                real = torch.ones(monet_desc.size()).to(self.device)
-
-                #####Standard adv losses
-                #adv_loss_monet = self.mse_loss(monet_desc, real)
-                #adv_loss_photo = self.mse_loss(photo_desc, real)
-
-                #######WASSENSTEIN GAN LOSSES!
-                adv_loss_monet = self.WassLoss(monet_desc,real=None,generator_loss=True)
-                adv_loss_photo = self.WassLoss(photo_desc,real=None,generator_loss=True)
-
-                # total generator loss
-                total_gen_loss = cycle_loss_monet - adv_loss_monet\
-                              + cycle_loss_photo -adv_loss_photo\
-                              + idt_loss_monet + idt_loss_photo
-                
-                avg_gen_loss += total_gen_loss.item()
-
-                # backward pass
-                total_gen_loss.backward()
-                self.RMSprop_gen.step()
-
-
                 
                 t.set_postfix(gen_loss=total_gen_loss.item(), desc_loss=total_desc_loss.item())
 
