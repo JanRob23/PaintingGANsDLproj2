@@ -175,9 +175,8 @@ class CycleGAN(object):
                 # generator losses - identity, Adversarial, cycle consistency
                 #cycle consistency loss is left as Standard GAN
 
-                #might not be needed
-                #idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
-                #idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
+                idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
+                idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
                 cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * self.lmbda
                 cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * self.lmbda
@@ -198,7 +197,7 @@ class CycleGAN(object):
                 # total generator loss
                 total_gen_loss = cycle_loss_monet + adv_loss_monet\
                               + cycle_loss_photo + adv_loss_photo\
-                              #+ idt_loss_monet + idt_loss_photo
+                              + idt_loss_monet + idt_loss_photo
                 
                 avg_gen_loss += total_gen_loss.item()
 
@@ -234,11 +233,11 @@ class CycleGAN(object):
                 #photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
 
                 #Wassenstein loss for critics
-                monet_desc_loss = self.WassLoss(monet_desc_fake,monet_desc_real,generator_loss = False)
-                photo_desc_loss = self.WassLoss(photo_desc_fake,photo_desc_real,generator_loss=False)
+                monet_desc_loss = self.WassLoss(monet_desc_fake,monet_desc_real,generator_loss = False)/2
+                photo_desc_loss = self.WassLoss(photo_desc_fake,photo_desc_real,generator_loss=False)/2
 
-                ##monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
-                ##photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
+                #monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
+                #photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
                 total_desc_loss = monet_desc_loss + photo_desc_loss
                 avg_desc_loss += total_desc_loss.item()
 
@@ -280,3 +279,4 @@ class CycleGAN(object):
       
             self.gen_lr_sched.step()
             self.desc_lr_sched.step()
+
