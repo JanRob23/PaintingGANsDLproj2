@@ -171,7 +171,7 @@ class CycleGAN(object):
 
                 # Forward pass through Descriminator
 
-                for _ in range(CRITIC_ITERATIONS):
+                for _ in range(5):
 
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.RMSprop_desc.zero_grad()
