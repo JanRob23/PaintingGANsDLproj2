@@ -214,9 +214,7 @@ class CycleGAN(object):
                 adv_loss_photo = self.WassLoss(photo_desc,real=None,generator_loss=True)
 
                 # total generator loss
-                total_gen_loss = cycle_loss_monet +adv_loss_monet\
-                              + cycle_loss_photo +adv_loss_photo\
-                              + idt_loss_monet + idt_loss_photo
+                total_gen_loss = cycle_loss_monet + adv_loss_monet + cycle_loss_photo + adv_loss_photo + idt_loss_monet + idt_loss_photo
                 
                 avg_gen_loss += total_gen_loss.item()
 
