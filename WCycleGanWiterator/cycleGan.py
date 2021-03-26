@@ -6,6 +6,7 @@ import torch.nn as nn
 from utils import *
 from fileIO import *
 
+
 class Resblock(nn.Module):
     def __init__(self, in_features, use_dropout=True, dropout_ratio=0.5):
         super().__init__()
@@ -20,6 +21,8 @@ class Resblock(nn.Module):
 
     def forward(self, x):
         return x + self.res(x)
+
+
 class Generator(nn.Module):
     def __init__(self, in_ch, out_ch, num_res_blocks=6):
         super().__init__()
@@ -41,6 +44,7 @@ class Generator(nn.Module):
     def forward(self, x):
         return self.gen(x)
 
+
 class Discriminator(nn.Module):
     def __init__(self, in_ch, num_layers=4):
         super().__init__()
@@ -48,9 +52,9 @@ class Discriminator(nn.Module):
         model.append(nn.Conv2d(in_ch, 64, 4, stride=2, padding=1))
         model.append(nn.LeakyReLU(0.2, inplace=True))
         for i in range(1, num_layers):
-            in_chs = 64 * 2**(i-1)
+            in_chs = 64 * 2 ** (i - 1)
             out_chs = in_chs * 2
-            if i == num_layers -1:
+            if i == num_layers - 1:
                 model.append(Convlayer(in_chs, out_chs, 4, 1))
             else:
                 model.append(Convlayer(in_chs, out_chs, 4, 2))
@@ -60,10 +64,12 @@ class Discriminator(nn.Module):
     def forward(self, x):
         return self.disc(x)
 
+
 class WassersteinGANLoss(nn.Module):
     """WassersteinGANLoss
     ref: Wasserstein GAN (https://arxiv.org/abs/1701.07875)
     """
+
     def __init__(self):
         super(WassersteinGANLoss, self).__init__()
 
@@ -73,7 +79,6 @@ class WassersteinGANLoss(nn.Module):
         else:
             wloss = -(real.mean() - fake.mean())
         return wloss
-
 
 
 def Upsample(in_ch, out_ch, use_dropout=True, dropout_ratio=0.5):
@@ -90,6 +95,7 @@ def Upsample(in_ch, out_ch, use_dropout=True, dropout_ratio=0.5):
             nn.InstanceNorm2d(out_ch),
             nn.GELU()
         )
+
 
 def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_norm=True, use_pad=True):
     if use_pad:
@@ -113,10 +119,11 @@ def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_n
         actv
     )
 
+
 class CycleGAN(object):
     def __init__(self, in_ch, out_ch, epochs, device, start_lr=2e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
         self.epochs = epochs
-        self.decay_epoch = decay_epoch if decay_epoch > 0 else int(self.epochs/2)
+        self.decay_epoch = decay_epoch if decay_epoch > 0 else int(self.epochs / 2)
         self.lmbda = lmbda
         self.idt_coef = idt_coef
         self.device = device
@@ -128,9 +135,9 @@ class CycleGAN(object):
         self.mse_loss = nn.MSELoss()
         self.l1_loss = nn.L1Loss()
         self.RMSprop_gen = torch.optim.RMSprop(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
-                                         lr = start_lr)
+                                               lr=start_lr)
         self.RMSprop_desc = torch.optim.RMSprop(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
-                                          lr=start_lr)
+                                                lr=start_lr)
         self.sample_monet = sample_fake()
         self.sample_photo = sample_fake()
         gen_lr = lr_sched(self.decay_epoch, self.epochs)
@@ -150,7 +157,7 @@ class CycleGAN(object):
         self.gen_ptm = self.gen_ptm.to(self.device)
         self.desc_m = self.desc_m.to(self.device)
         self.desc_p = self.desc_p.to(self.device)
-        
+
     def train(self, photo_dl):
         for epoch in range(self.epochs):
             start_time = time.time()
@@ -162,20 +169,71 @@ class CycleGAN(object):
                 update_req_grad([self.desc_m, self.desc_p], False)
                 self.RMSprop_gen.zero_grad()
 
-                #Forward pass through generator
+                # Forward pass through Descriminator
+
+                for _ in range(CRITIC_ITERATIONS):
+
+                    update_req_grad([self.desc_m, self.desc_p], True)
+                    self.RMSprop_desc.zero_grad()
+
+                    fake_monet = self.sample_monet([fake_monet.cpu().data.numpy()])[0]
+                    fake_photo = self.sample_photo([fake_photo.cpu().data.numpy()])[0]
+                    fake_monet = torch.tensor(fake_monet).to(self.device)
+                    fake_photo = torch.tensor(fake_photo).to(self.device)
+
+                    monet_desc_real = self.desc_m(monet_img)
+                    monet_desc_fake = self.desc_m(fake_monet)
+                    photo_desc_real = self.desc_p(photo_img)
+                    photo_desc_fake = self.desc_p(fake_photo)
+
+                    real = torch.ones(monet_desc_real.size()).to(self.device)
+                    fake = torch.ones(monet_desc_fake.size()).to(self.device)
+
+                    # Descriminator losses
+                    # --------------------
+
+                    # modify to wassenstein gan loss
+
+                    # monet_desc_real_loss = self.mse_loss(monet_desc_real, real)
+                    # monet_desc_fake_loss = self.mse_loss(monet_desc_fake, fake)
+                    # photo_desc_real_loss = self.mse_loss(photo_desc_real, real)
+                    # photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
+
+                    # Wassenstein loss for critics
+                    monet_desc_loss = self.WassLoss(monet_desc_fake, monet_desc_real, generator_loss=False) / 2
+                    photo_desc_loss = self.WassLoss(photo_desc_fake, photo_desc_real, generator_loss=False) / 2
+
+                    # monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
+                    # photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
+                    total_desc_loss = monet_desc_loss + photo_desc_loss
+                    avg_desc_loss += total_desc_loss.item()
+
+                    # Backward
+                    # Weight clip value : play around with it :)
+                    clip = 0.05
+                    monet_desc_loss.backward()
+                    photo_desc_loss.backward()
+                    self.RMSprop_desc.step()
+
+                    # Clip both discriminator's weight to the given clipping value
+                    for p in self.desc_m.parameters():
+                        p.data.clamp_(-clip, clip)
+                    for p in self.desc_p.parameters():
+                        p.data.clamp_(-clip, clip)
+
+                # Forward pass through generator
                 fake_photo = self.gen_mtp(monet_img)
                 fake_monet = self.gen_ptm(photo_img)
 
-                cycl_monet = self.gen_ptm(fake_photo) #
-                cycl_photo = self.gen_mtp(fake_monet) #
+                cycl_monet = self.gen_ptm(fake_photo)  #
+                cycl_photo = self.gen_mtp(fake_monet)  #
 
                 id_monet = self.gen_ptm(monet_img)
                 id_photo = self.gen_mtp(photo_img)
 
                 # generator losses - identity, Adversarial, cycle consistency
-                #cycle consistency loss is left as Standard GAN
+                # cycle consistency loss is left as Standard GAN
 
-                #might not be needed
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
@@ -188,77 +246,28 @@ class CycleGAN(object):
                 real = torch.ones(monet_desc.size()).to(self.device)
 
                 #####Standard adv losses
-                #adv_loss_monet = self.mse_loss(monet_desc, real)
-                #adv_loss_photo = self.mse_loss(photo_desc, real)
+                # adv_loss_monet = self.mse_loss(monet_desc, real)
+                # adv_loss_photo = self.mse_loss(photo_desc, real)
 
                 #######WASSENSTEIN GAN LOSSES!
-                adv_loss_monet = self.WassLoss(monet_desc,real=None,generator_loss=True)
-                adv_loss_photo = self.WassLoss(photo_desc,real=None,generator_loss=True)
+                adv_loss_monet = self.WassLoss(monet_desc, real=None, generator_loss=True)
+                adv_loss_photo = self.WassLoss(photo_desc, real=None, generator_loss=True)
 
                 # total generator loss
-                total_gen_loss = cycle_loss_monet - adv_loss_monet\
-                              + cycle_loss_photo -adv_loss_photo\
-                              + idt_loss_monet + idt_loss_photo
-                
+                total_gen_loss = cycle_loss_monet + adv_loss_monet \
+                                 + cycle_loss_photo + adv_loss_photo \
+                                 + idt_loss_monet + idt_loss_photo
+
                 avg_gen_loss += total_gen_loss.item()
 
                 # backward pass
                 total_gen_loss.backward()
                 self.RMSprop_gen.step()
 
-                # Forward pass through Descriminator
-                update_req_grad([self.desc_m, self.desc_p], True)
-                self.RMSprop_desc.zero_grad()
-
-                fake_monet = self.sample_monet([fake_monet.cpu().data.numpy()])[0]
-                fake_photo = self.sample_photo([fake_photo.cpu().data.numpy()])[0]
-                fake_monet = torch.tensor(fake_monet).to(self.device)
-                fake_photo = torch.tensor(fake_photo).to(self.device)
-
-                monet_desc_real = self.desc_m(monet_img)
-                monet_desc_fake = self.desc_m(fake_monet)
-                photo_desc_real = self.desc_p(photo_img)
-                photo_desc_fake = self.desc_p(fake_photo)
-
-                real = torch.ones(monet_desc_real.size()).to(self.device)
-                fake = torch.ones(monet_desc_fake.size()).to(self.device)
-
-                # Descriminator losses
-                # --------------------
-
-                #modify to wassenstein gan loss
-
-                #monet_desc_real_loss = self.mse_loss(monet_desc_real, real)
-                #monet_desc_fake_loss = self.mse_loss(monet_desc_fake, fake)
-                #photo_desc_real_loss = self.mse_loss(photo_desc_real, real)
-                #photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
-
-                #Wassenstein loss for critics
-                monet_desc_loss = self.WassLoss(monet_desc_fake,monet_desc_real,generator_loss = False)/2
-                photo_desc_loss = self.WassLoss(photo_desc_fake,photo_desc_real,generator_loss=False)/2
-
-                #monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
-                #photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
-                total_desc_loss = -monet_desc_loss - photo_desc_loss
-                avg_desc_loss += total_desc_loss.item()
-
-                # Backward
-                #Weight clip value : play around with it :)
-                clip= 0.05
-                monet_desc_loss.backward()
-                photo_desc_loss.backward()
-                self.RMSprop_desc.step()
-
-                #Clip both discriminator's weight to the given clipping value
-                for p in self.desc_m.parameters():
-                    p.data.clamp_(-clip,clip)
-                for p in self.desc_p.parameters():
-                    p.data.clamp_(-clip, clip)
-                
                 t.set_postfix(gen_loss=total_gen_loss.item(), desc_loss=total_desc_loss.item())
 
             save_dict = {
-                'epoch': epoch+1,
+                'epoch': epoch + 1,
                 'gen_mtp': self.gen_mtp.state_dict(),
                 'gen_ptm': self.gen_ptm.state_dict(),
                 'desc_m': self.desc_m.state_dict(),
@@ -267,17 +276,17 @@ class CycleGAN(object):
                 'optimizer_desc': self.RMSprop_desc.state_dict()
             }
             save_checkpoint(save_dict, 'current.ckpt')
-            
+
             avg_gen_loss /= photo_dl.__len__()
             avg_desc_loss /= photo_dl.__len__()
             time_req = time.time() - start_time
-            
+
             self.gen_stats.append(avg_gen_loss, time_req)
             self.desc_stats.append(avg_desc_loss, time_req)
-            
-            print("Epoch: (%d) | Generator Loss:%f | Discriminator Loss:%f" % 
-                                                (epoch+1, avg_gen_loss, avg_desc_loss))
-      
+
+            print("Epoch: (%d) | Generator Loss:%f | Discriminator Loss:%f" %
+                  (epoch + 1, avg_gen_loss, avg_desc_loss))
+
             self.gen_lr_sched.step()
             self.desc_lr_sched.step()
 
