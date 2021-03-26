@@ -279,3 +279,18 @@ class CycleGAN(object):
       
             self.gen_lr_sched.step()
             self.desc_lr_sched.step()
+
+            _, ax = plt.subplots(5, 2, figsize=(12, 12))
+            for i in range(5):
+                photo_img, _ = next(iter(img_dl))
+                pred_monet = gan.gen_ptm(photo_img.to(device)).cpu().detach()
+                photo_img = unnorm(photo_img)
+                pred_monet = unnorm(pred_monet)
+
+                ax[i, 0].imshow(photo_img[0].permute(1, 2, 0))
+                ax[i, 1].imshow(pred_monet[0].permute(1, 2, 0))
+                ax[i, 0].set_title("Input Photo")
+                ax[i, 1].set_title("Monet-esque Photo")
+                ax[i, 0].axis("off")
+                ax[i, 1].axis("off")
+            plt.show()
