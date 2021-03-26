@@ -175,8 +175,9 @@ class CycleGAN(object):
                 # generator losses - identity, Adversarial, cycle consistency
                 #cycle consistency loss is left as Standard GAN
 
-                idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
-                idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
+                #might not be needed
+                #idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
+                #idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
                 cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * self.lmbda
                 cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * self.lmbda
@@ -197,7 +198,7 @@ class CycleGAN(object):
                 # total generator loss
                 total_gen_loss = cycle_loss_monet + adv_loss_monet\
                               + cycle_loss_photo + adv_loss_photo\
-                              + idt_loss_monet + idt_loss_photo
+                              #+ idt_loss_monet + idt_loss_photo
                 
                 avg_gen_loss += total_gen_loss.item()
 
@@ -279,18 +280,3 @@ class CycleGAN(object):
       
             self.gen_lr_sched.step()
             self.desc_lr_sched.step()
-
-            _, ax = plt.subplots(5, 2, figsize=(12, 12))
-            for i in range(5):
-                photo_img, _ = next(iter(img_dl))
-                pred_monet = gan.gen_ptm(photo_img.to(device)).cpu().detach()
-                photo_img = unnorm(photo_img)
-                pred_monet = unnorm(pred_monet)
-
-                ax[i, 0].imshow(photo_img[0].permute(1, 2, 0))
-                ax[i, 1].imshow(pred_monet[0].permute(1, 2, 0))
-                ax[i, 0].set_title("Input Photo")
-                ax[i, 1].set_title("Monet-esque Photo")
-                ax[i, 0].axis("off")
-                ax[i, 1].axis("off")
-            plt.show()
