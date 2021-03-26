@@ -113,6 +113,24 @@ def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_n
         actv
     )
 
+
+#class Grad_penalty(model, real, fake, device='cpu'):
+    #BATCH_SIZE, C, H, W = real.shape
+    #epsilon = torch.rand((BATCH_SIZE, 1, 1, 1)).repeat(1, C, H, W).to(device)
+    #inter_images = real * epsilon + fake * (1 - epsilon)
+    #mixed_scores = discriminator(inter_images)
+    #gradient = torch.autograd.grad(inputs =  inter_images,
+      #                             outputs = mixed_scores,
+     #                              grad_outputs=torch.ones_like(mixed_scores),
+     #                              create_graph = True,
+     #                              retain_graph = True,
+     #                              )[0]
+    #gradient = gradient.view(gradient.shape[0],-1)
+    #gradient_norm = gradient.norm(2,dim =1 )
+    #gradient_penalty = torch.mean((gradient_norm -1)**2)
+   # return gradient_penalty
+
+
 class CycleGAN(object):
     def __init__(self, in_ch, out_ch, epochs, device, start_lr=2e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
         self.epochs = epochs
@@ -140,6 +158,7 @@ class CycleGAN(object):
         self.gen_stats = AvgStats()
         self.desc_stats = AvgStats()
         self.WassLoss = WassersteinGANLoss()
+
 
     def init_models(self):
         init_weights(self.gen_mtp)
@@ -175,7 +194,6 @@ class CycleGAN(object):
                 # generator losses - identity, Adversarial, cycle consistency
                 #cycle consistency loss is left as Standard GAN
 
-                #might not be needed
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
@@ -234,28 +252,33 @@ class CycleGAN(object):
                 #photo_desc_real_loss = self.mse_loss(photo_desc_real, real)
                 #photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
 
-                #Wassenstein loss for critics
+                #Wassenstein loss for critics (+GRADIENT PENALTY)
+                   # lambda =10
+                   # monet_gradient_pen = Grad_penalty(CycleGAN,monet_desc_real,monet_desc_fake , device='cuda')
+                   # photo_gradient_pen = Grad_penalty(CycleGAN, photo_desc_real, photo_desc_fake, device='cuda')
+
                     monet_desc_loss = self.WassLoss(monet_desc_fake,monet_desc_real,generator_loss = False)/2
-                    photo_desc_loss = self.WassLoss(photo_desc_fake,photo_desc_real,generator_loss=False)/2
+
+                    photo_desc_loss = self.WassLoss(photo_desc_fake,photo_desc_real,generator_loss = False)/2
+
 
                 #monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
                 #photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
                     total_desc_loss = -monet_desc_loss - photo_desc_loss
                     avg_desc_loss += total_desc_loss.item()
-
                 # Backward
                 #Weight clip value : play around with it :)
                     clip= 0.01
                     monet_desc_loss.backward()
                     photo_desc_loss.backward()
                     self.RMSprop_desc.step()
-
                 #Clip both discriminator's weight to the given clipping value
                     for p in self.desc_m.parameters():
                         p.data.clamp_(-clip,clip)
                     for p in self.desc_p.parameters():
                         p.data.clamp_(-clip, clip)
-                
+
+
                 t.set_postfix(gen_loss=total_gen_loss.item(), desc_loss=total_desc_loss.item())
 
             save_dict = {
