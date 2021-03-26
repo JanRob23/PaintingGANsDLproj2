@@ -11,10 +11,10 @@ def go(monet, photos):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     set_seed(719)
     img_ds = ImageDataset(monet, photos)
-    img_dl = DataLoader(img_ds, batch_size=15, pin_memory=True)
+    img_dl = DataLoader(img_ds, batch_size=5, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
-    gan = CycleGAN(3, 3, 5, device)
+    gan = CycleGAN(3, 3, 15, device)
 
     save_dict = {
         'epoch': 0,
