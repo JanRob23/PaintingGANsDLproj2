@@ -214,8 +214,8 @@ class CycleGAN(object):
                 adv_loss_photo = self.WassLoss(photo_desc,real=None,generator_loss=True)
 
                 # total generator loss
-                total_gen_loss = cycle_loss_monet - adv_loss_monet\
-                              + cycle_loss_photo -adv_loss_photo\
+                total_gen_loss = cycle_loss_monet +adv_loss_monet\
+                              + cycle_loss_photo +adv_loss_photo\
                               + idt_loss_monet + idt_loss_photo
                 
                 avg_gen_loss += total_gen_loss.item()
@@ -264,7 +264,7 @@ class CycleGAN(object):
 
                 #monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
                 #photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
-                    total_desc_loss = -monet_desc_loss - photo_desc_loss
+                    total_desc_loss = +monet_desc_loss + photo_desc_loss
                     avg_desc_loss += total_desc_loss.item()
                 # Backward
                 #Weight clip value : play around with it :)
