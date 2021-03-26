@@ -54,8 +54,7 @@ class Discriminator(nn.Module):
                 model.append(Convlayer(in_chs, out_chs, 4, 1))
             else:
                 model.append(Convlayer(in_chs, out_chs, 4, 2))
-        model.append(nn.Conv2d(512, 256, kernel_size=4, stride=1, padding=1))
-        model.append(nn.Linear(256,1))
+        model.append(nn.Conv2d(512, 1, kernel_size=4, stride=1, padding=1))
         self.disc = nn.Sequential(*model)
 
     def forward(self, x):
