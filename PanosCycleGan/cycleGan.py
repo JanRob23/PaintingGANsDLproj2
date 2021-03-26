@@ -208,7 +208,7 @@ class CycleGAN(object):
                 self.RMSprop_gen.step()
 
                 # Forward pass through Descriminator
-                for _ in range(5):
+                for i in range (0,5)
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.RMSprop_desc.zero_grad()
 
@@ -225,35 +225,35 @@ class CycleGAN(object):
                     real = torch.ones(monet_desc_real.size()).to(self.device)
                     fake = torch.ones(monet_desc_fake.size()).to(self.device)
 
-                    # Descriminator losses
-                    # --------------------
+                # Descriminator losses
+                # --------------------
 
-                    # modify to wassenstein gan loss
+                #modify to wassenstein gan loss
 
-                    # monet_desc_real_loss = self.mse_loss(monet_desc_real, real)
-                    # monet_desc_fake_loss = self.mse_loss(monet_desc_fake, fake)
-                    # photo_desc_real_loss = self.mse_loss(photo_desc_real, real)
-                    # photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
+                #monet_desc_real_loss = self.mse_loss(monet_desc_real, real)
+                #monet_desc_fake_loss = self.mse_loss(monet_desc_fake, fake)
+                #photo_desc_real_loss = self.mse_loss(photo_desc_real, real)
+                #photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
 
-                    # Wassenstein loss for critics
-                    monet_desc_loss = self.WassLoss(monet_desc_fake, monet_desc_real, generator_loss=False) / 2
-                    photo_desc_loss = self.WassLoss(photo_desc_fake, photo_desc_real, generator_loss=False) / 2
+                #Wassenstein loss for critics
+                    monet_desc_loss = self.WassLoss(monet_desc_fake,monet_desc_real,generator_loss = False)/2
+                    photo_desc_loss = self.WassLoss(photo_desc_fake,photo_desc_real,generator_loss=False)/2
 
-                    # monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
-                    # photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
-                    total_desc_loss = monet_desc_loss + photo_desc_loss
+                #monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
+                #photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
+                    total_desc_loss = -monet_desc_loss - photo_desc_loss
                     avg_desc_loss += total_desc_loss.item()
 
-                    # Backward
-                    # Weight clip value : play around with it :)
-                    clip = 0.05
+                # Backward
+                #Weight clip value : play around with it :)
+                    clip= 0.01
                     monet_desc_loss.backward()
                     photo_desc_loss.backward()
                     self.RMSprop_desc.step()
 
-                    # Clip both discriminator's weight to the given clipping value
+                #Clip both discriminator's weight to the given clipping value
                     for p in self.desc_m.parameters():
-                        p.data.clamp_(-clip, clip)
+                        p.data.clamp_(-clip,clip)
                     for p in self.desc_p.parameters():
                         p.data.clamp_(-clip, clip)
                 
