@@ -69,9 +69,9 @@ class WassersteinGANLoss(nn.Module):
 
     def __call__(self, fake, real=None, generator_loss=True):
         if generator_loss:
-            wloss = fake.mean()
+            wloss = -fake.mean()
         else:
-            wloss = real.mean() - fake.mean()
+            wloss = -(real.mean() - fake.mean())
         return wloss
 
 
