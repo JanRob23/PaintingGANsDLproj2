@@ -11,7 +11,7 @@ def go(monet, photos):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     set_seed(719)
     img_ds = ImageDataset(monet, photos)
-    img_dl = DataLoader(img_ds, batch_size=3, pin_memory=True)
+    img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
     gan = CycleGAN(3, 3, 20, device)
