@@ -10,7 +10,7 @@ import os
 class complex_autoencoder(nn.Module):
     def __init__(self):
         super(complex_autoencoder, self).__init__()
-        self.batch_size = 20
+        self.batch_size = 5
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, 17, 1, 0), # 256 - 17 + 1 -> 240
             nn.Tanh(),
@@ -50,7 +50,7 @@ class complex_autoencoder(nn.Module):
 
 def train_autoencoder(monet_images):
     num_epochs = 30
-    batch_size = 1
+    batch_size = 5
     learning_rate = 2e-5
     model = complex_autoencoder()
     monet_images = monet_images / 255
@@ -64,22 +64,22 @@ def train_autoencoder(monet_images):
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
                                  weight_decay=1e-5)
-    total_loss = 0
+
     for epoch in tqdm(range(num_epochs), desc='epochs'):
+        total_loss = 0
         for batch in tqdm(range(monet_images.shape[0])):
             img = monet_images[batch]
             if torch.cuda.is_available():
                 img = Variable(img).cuda()
             # ===================forward=====================
             output = model(img)
-            print(img.shape)
-            print(output.shape)
             loss = criterion(output, img)
+            total_loss += loss.data
             # ===================backward====================
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+        print("Average loss this epoch: " + str(total_loss/batch_size))
         # ===================log========================
         # total_loss += loss.data
         # print('epoch [{}/{}], loss:{:.4f}'
