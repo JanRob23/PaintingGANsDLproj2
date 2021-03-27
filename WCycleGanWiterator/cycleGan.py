@@ -77,6 +77,7 @@ class WassersteinGANLoss(nn.Module):
             #Grad_penalty
             BATCH_SIZE, C, H, W = real.shape
             epsilon = torch.rand((BATCH_SIZE, 1, 1, 1)).repeat(1, C, H, W).to(device)
+            print(epsilon, 'isepsilon')
             inter_images = real * epsilon + fake * (1 - epsilon)
             mixed_scores = desc(inter_images)
             gradient = torch.autograd.grad(inputs =  inter_images,
@@ -213,8 +214,8 @@ class CycleGAN(object):
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
-                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * 15
-                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * 15
+                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * 20
+                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * 20
 
                 monet_desc = self.desc_m(fake_monet)
                 photo_desc = self.desc_p(fake_photo)
