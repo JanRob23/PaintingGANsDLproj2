@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from utils import *
 from fileIO import *
 from AE import *
-
+ 
 
 def go(monet, photos):
     
