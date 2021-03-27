@@ -194,8 +194,8 @@ class CycleGAN(object):
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
-                cycle_loss_monet = - self.WassLoss(cycl_monet, monet_img) * self.lmbda
-                cycle_loss_photo = - self.WassLoss(cycl_photo, photo_img) * self.lmbda
+                cycle_loss_monet =  self.WassLoss(cycl_monet, monet_img) #* self.lmbda
+                cycle_loss_photo =  self.WassLoss(cycl_photo, photo_img) #* self.lmbda
 
                 monet_desc = self.desc_m(fake_monet)
                 photo_desc = self.desc_p(fake_photo)
@@ -211,7 +211,7 @@ class CycleGAN(object):
                 adv_loss_photo = self.WassLoss(photo_desc,real=None,generator_loss=True)
 
                 # total generator loss
-                total_gen_loss = cycle_loss_monet - adv_loss_monet + cycle_loss_photo - adv_loss_photo + idt_loss_monet + idt_loss_photo
+                total_gen_loss = cycle_loss_monet + adv_loss_monet + cycle_loss_photo + adv_loss_photo + idt_loss_monet + idt_loss_photo
                 
                 avg_gen_loss += total_gen_loss.item()
 
