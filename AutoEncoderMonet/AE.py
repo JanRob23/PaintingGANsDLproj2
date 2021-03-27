@@ -71,7 +71,7 @@ class autoencoder(nn.Module):
                 loss = self.mse_loss(fake_monet, monet_img)
                 loss.backward()
                 self.opt.step()
-                train_loss += loss.item()
+                avg_loss += loss.item()
 
             save_dict = {
             'epoch': epoch+1,
@@ -79,7 +79,7 @@ class autoencoder(nn.Module):
             'optimizer': self.opt.state_dict()
             }
             save_checkpoint(save_dict, 'current.ckpt')
-            train_loss /= image_dl.__len__()
+            avg_loss /= image_dl.__len__()
             time_req = time.time() - start_time
-            self.loss_stats.append(train_loss, time_req)
-            print(f'Epoch: {epoch+1} | Loss:{train_loss}')
+            self.loss_stats.append(avg_loss, time_req)
+            print(f'Epoch: {epoch+1} | Loss:{avg_loss}')
