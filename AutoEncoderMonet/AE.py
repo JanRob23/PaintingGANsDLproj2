@@ -53,6 +53,12 @@ class autoencoder(nn.Module):
         x = self.decoder(x)
         return x
 
+    def load_model(self, ckpt):
+        self.epoch = ckpt['epoch']
+        self.load_state_dict(ckpt['weights'])
+        self.opt.load_state_dict(ckpt['optimizer'])
+
+
     def train(self, image_dl):
         for epoch in self.training_range:
             self.epoch = epoch

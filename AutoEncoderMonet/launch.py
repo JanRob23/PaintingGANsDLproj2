@@ -39,6 +39,7 @@ def go(monet, photos):
             ae.load_model(load_checkpoint('current.ckpt', map_location = torch.device('cpu')))
         else:
             ae.load_model(load_checkpoint('current.ckpt'))
+        
 
     ae.train(img_dl)
 
