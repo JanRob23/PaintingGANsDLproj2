@@ -64,8 +64,9 @@ def train_autoencoder(monet_images):
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
                                  weight_decay=1e-5)
-    total_loss = 0
+
     for epoch in tqdm(range(num_epochs), desc='epochs'):
+        total_loss = 0
         for batch in tqdm(range(monet_images.shape[0])):
             img = monet_images[batch]
             if torch.cuda.is_available():
@@ -73,11 +74,12 @@ def train_autoencoder(monet_images):
             # ===================forward=====================
             output = model(img)
             loss = criterion(output, img)
+            total_loss += loss.data
             # ===================backward====================
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+        print("Average loss this epoch: " + str(total_loss/batch_size))
         # ===================log========================
         # total_loss += loss.data
         # print('epoch [{}/{}], loss:{:.4f}'
