@@ -24,7 +24,7 @@ def go(monet, photos):
     img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
-    ae = autoencoder(50, device)
+    ae = autoencoder(30, device)
     ae.to(device)
     torch.set_grad_enabled(True)
 
