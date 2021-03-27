@@ -10,7 +10,7 @@ import os
 class complex_autoencoder(nn.Module):
     def __init__(self):
         super(complex_autoencoder, self).__init__()
-        self.batch_size = 20
+        self.batch_size = 5
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, 17, 1, 0), # 256 - 17 + 1 -> 240
             nn.Tanh(),
@@ -50,7 +50,7 @@ class complex_autoencoder(nn.Module):
 
 def train_autoencoder(monet_images):
     num_epochs = 30
-    batch_size = 1
+    batch_size = 5
     learning_rate = 2e-5
     model = complex_autoencoder()
     monet_images = monet_images / 255
@@ -72,8 +72,6 @@ def train_autoencoder(monet_images):
                 img = Variable(img).cuda()
             # ===================forward=====================
             output = model(img)
-            print(img.shape)
-            print(output.shape)
             loss = criterion(output, img)
             # ===================backward====================
             optimizer.zero_grad()
