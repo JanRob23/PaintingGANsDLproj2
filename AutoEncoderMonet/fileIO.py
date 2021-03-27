@@ -27,7 +27,7 @@ class ImageDataset(Dataset):
         for i, fl in enumerate(os.listdir(self.monet_dir)):
             self.monet_idx[i] = fl
         for i, fl in enumerate(sorted(os.listdir(self.photo_dir))):
-            self.photo_idx[i] = fl
+            self.photo_idx[i] = fl 
         self.idx = 1
         self.range = len(self.monet_idx.keys()) 
 
