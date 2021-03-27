@@ -26,6 +26,7 @@ def go(monet, photos):
 
     ae = autoencoder(50, device)
     ae.to(device)
+    torch.set_grad_enabled(True)
 
     save_dict = {
         'epoch': 0,
