@@ -8,7 +8,7 @@ from fileIO import *
 
 
 class Resblock(nn.Module):
-    def __init__(self, in_features, use_dropout=True, dropout_ratio=0.5):
+    def __init__(self, in_features, use_dropout = True, dropout_ratio=0.5):
         super().__init__()
         layers = list()
         layers.append(nn.ReflectionPad2d(1))
@@ -69,7 +69,7 @@ class WassersteinGANLoss(nn.Module):
     def __init__(self):
         super(WassersteinGANLoss, self).__init__()
 
-    def __call__(self, fake, real=None, generator_loss=True,lmbda=10,desc):
+    def __call__(self, fake, real=None, generator_loss=True,lmbda=10,desc = None, device = 'cpu'):
         if generator_loss:
             wloss = -fake.mean()
         else:
@@ -162,16 +162,16 @@ class CycleGAN(object):
         self.init_models()
         self.mse_loss = nn.MSELoss()
         self.l1_loss = nn.L1Loss()
-        self.RMSprop_gen = torch.optim.RMSprop(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
+        self.Adam_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
                                                lr=start_lr)
-        self.RMSprop_desc = torch.optim.RMSprop(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
+        self.Adam_desc = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
                                                 lr=start_lr)
         self.sample_monet = sample_fake()
         self.sample_photo = sample_fake()
         gen_lr = lr_sched(self.decay_epoch, self.epochs)
         desc_lr = lr_sched(self.decay_epoch, self.epochs)
-        self.gen_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSprop_gen, gen_lr.step)
-        self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSprop_desc, desc_lr.step)
+        self.gen_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.Adam_gen, gen_lr.step)
+        self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.Adam_desc, desc_lr.step)
         self.gen_stats = AvgStats()
         self.desc_stats = AvgStats()
         self.WassLossWPenalty = WassersteinGANLoss()
@@ -195,7 +195,7 @@ class CycleGAN(object):
             for i, (photo_real, monet_real) in enumerate(t):
                 photo_img, monet_img = photo_real.to(self.device), monet_real.to(self.device)
                 update_req_grad([self.desc_m, self.desc_p], False)
-                self.RMSprop_gen.zero_grad()
+                self.Adam_gen.zero_grad()
 
                 # Forward pass through generator
                 fake_photo = self.gen_mtp(monet_img)
@@ -226,8 +226,8 @@ class CycleGAN(object):
                 # adv_loss_photo = self.mse_loss(photo_desc, real)
 
                 #######WASSENSTEIN GAN LOSSES!
-                adv_loss_monet = self.WassLossWPenalty(monet_desc, real=None, generator_loss = True,desc = None)
-                adv_loss_photo = self.WassLossWPenalty(photo_desc, real=None, generator_loss = True,desc = None)
+                adv_loss_monet = self.WassLossWPenalty(monet_desc, real=None, generator_loss = True,desc = None,device = 'cuda')
+                adv_loss_photo = self.WassLossWPenalty(photo_desc, real=None, generator_loss = True,desc = None,device = 'cuda')
 
                 # total generator loss
                 total_gen_loss = cycle_loss_monet + adv_loss_monet + cycle_loss_photo + adv_loss_photo + idt_loss_monet + idt_loss_photo
@@ -236,13 +236,13 @@ class CycleGAN(object):
 
                 # backward pass
                 total_gen_loss.backward()
-                self.RMSprop_gen.step()
+                self.Adam_gen.step()
 
                 # Forward pass through Descriminator
                 # train iteration between Discriminators and Generators = 5:1
                 for i in range(0, 5):
                     update_req_grad([self.desc_m, self.desc_p], True)
-                    self.RMSprop_desc.zero_grad()
+                    self.Adam_desc.zero_grad()
 
                     fake_monet = self.sample_monet([fake_monet.cpu().data.numpy()])[0]
                     fake_photo = self.sample_photo([fake_photo.cpu().data.numpy()])[0]
@@ -268,29 +268,27 @@ class CycleGAN(object):
                     # photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
 
                     # Wassenstein loss for critics (+GRADIENT PENALTY)
-                    #lambda =10
                     # monet_gradient_pen = Grad_penalty(CycleGAN,monet_desc_real,monet_desc_fake , device='cuda')
                     # photo_gradient_pen = Grad_penalty(CycleGAN, photo_desc_real, photo_desc_fake, device='cuda')
 
-                    monet_desc_loss = self.WassLossWPenalty(monet_desc_fake, monet_desc_real, generator_loss=False,desc= self.desc_m)/2
+                    monet_desc_loss = self.WassLossWPenalty(monet_desc_fake,
+                                                            monet_desc_real,
+                                                            generator_loss=False,
+                                                            desc= self.desc_m, device = 'cuda')/2
 
-                    photo_desc_loss = self.WassLossWPenalty(photo_desc_fake, photo_desc_real, generator_loss=False,desc = self.desc_p) / 2
+                    photo_desc_loss = self.WassLossWPenalty(photo_desc_fake,
+                                                            photo_desc_real,
+                                                            generator_loss=False,
+                                                            desc = self.desc_p,device ='cuda') / 2
 
                     # monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
                     # photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
                     total_desc_loss = + monet_desc_loss + photo_desc_loss
                     avg_desc_loss += total_desc_loss.item()
                     # Backward
-                    # Weight clip value : play around with it :)
-                    clip = 0.01
                     monet_desc_loss.backward()
                     photo_desc_loss.backward()
-                    self.RMSprop_desc.step()
-                    # Clip both discriminator's weight to the given clipping value
-                    for p in self.desc_m.parameters():
-                        p.data.clamp_(-clip, clip)
-                    for p in self.desc_p.parameters():
-                        p.data.clamp_(-clip, clip)
+                    self.Adam_desc.step()
 
                 t.set_postfix(gen_loss=total_gen_loss.item(), desc_loss=total_desc_loss.item())
 
@@ -300,8 +298,8 @@ class CycleGAN(object):
                 'gen_ptm': self.gen_ptm.state_dict(),
                 'desc_m': self.desc_m.state_dict(),
                 'desc_p': self.desc_p.state_dict(),
-                'optimizer_gen': self.RMSprop_gen.state_dict(),
-                'optimizer_desc': self.RMSprop_desc.state_dict()
+                'optimizer_gen': self.Adam_gen.state_dict(),
+                'optimizer_desc': self.Adam_desc.state_dict()
             }
             save_checkpoint(save_dict, 'current.ckpt')
 
