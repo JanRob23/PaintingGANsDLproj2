@@ -69,13 +69,28 @@ class WassersteinGANLoss(nn.Module):
     def __init__(self):
         super(WassersteinGANLoss, self).__init__()
 
-    def __call__(self, fake, real=None, generator_loss=True):
+    def __call__(self, fake, real=None, generator_loss=True,lmbda=10,desc):
         if generator_loss:
             wloss = -fake.mean()
         else:
             wloss = -real.mean() + fake.mean()
+            #Grad_penalty
+            BATCH_SIZE, C, H, W = real.shape
+            epsilon = torch.rand((BATCH_SIZE, 1, 1, 1)).repeat(1, C, H, W).to(device)
+            inter_images = real * epsilon + fake * (1 - epsilon)
+            mixed_scores = desc(inter_images)
+            gradient = torch.autograd.grad(inputs =  inter_images,
+                                         outputs = mixed_scores,
+                                          grad_outputs=torch.ones_like(mixed_scores),
+                                          create_graph = True,
+                                          retain_graph = True,
+                                          )[0]
+            gradient = gradient.view(gradient.shape[0],-1)
+            gradient_norm = gradient.norm(2,dim =1 )
+            gradient_penalty = torch.mean((gradient_norm -1)**2)
+            gradient_penalty=gradient_penalty * lmbda
+            wloss +=gradient_penalty
         return wloss
-
 
 def Upsample(in_ch, out_ch, use_dropout=True, dropout_ratio=0.5):
     if use_dropout:
@@ -159,7 +174,7 @@ class CycleGAN(object):
         self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSprop_desc, desc_lr.step)
         self.gen_stats = AvgStats()
         self.desc_stats = AvgStats()
-        self.WassLoss = WassersteinGANLoss()
+        self.WassLossWPenalty = WassersteinGANLoss()
 
     def init_models(self):
         init_weights(self.gen_mtp)
@@ -211,8 +226,8 @@ class CycleGAN(object):
                 # adv_loss_photo = self.mse_loss(photo_desc, real)
 
                 #######WASSENSTEIN GAN LOSSES!
-                adv_loss_monet = self.WassLoss(monet_desc, real=None, generator_loss=True)
-                adv_loss_photo = self.WassLoss(photo_desc, real=None, generator_loss=True)
+                adv_loss_monet = self.WassLossWPenalty(monet_desc, real=None, generator_loss = True,desc = None)
+                adv_loss_photo = self.WassLossWPenalty(photo_desc, real=None, generator_loss = True,desc = None)
 
                 # total generator loss
                 total_gen_loss = cycle_loss_monet + adv_loss_monet + cycle_loss_photo + adv_loss_photo + idt_loss_monet + idt_loss_photo
@@ -253,13 +268,13 @@ class CycleGAN(object):
                     # photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
 
                     # Wassenstein loss for critics (+GRADIENT PENALTY)
-                    # lambda =10
+                    #lambda =10
                     # monet_gradient_pen = Grad_penalty(CycleGAN,monet_desc_real,monet_desc_fake , device='cuda')
                     # photo_gradient_pen = Grad_penalty(CycleGAN, photo_desc_real, photo_desc_fake, device='cuda')
 
-                    monet_desc_loss = self.WassLoss(monet_desc_fake, monet_desc_real, generator_loss=False) / 2
+                    monet_desc_loss = self.WassLossWPenalty(monet_desc_fake, monet_desc_real, generator_loss=False,desc= self.desc_m)/2
 
-                    photo_desc_loss = self.WassLoss(photo_desc_fake, photo_desc_real, generator_loss=False) / 2
+                    photo_desc_loss = self.WassLossWPenalty(photo_desc_fake, photo_desc_real, generator_loss=False,desc = self.desc_p) / 2
 
                     # monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
                     # photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
