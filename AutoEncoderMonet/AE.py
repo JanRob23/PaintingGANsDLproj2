@@ -65,7 +65,7 @@ class autoencoder(nn.Module):
             
             for i, (photo_real, monet_real) in enumerate(t):
                 photo_img, monet_img = photo_real.float().to(self.device), monet_real.float().to(self.device)
-                update_req_grad([self.encoder, self.decoder], False)
+                #update_req_grad([self.encoder, self.decoder], False)
                 self.opt.zero_grad()
                 fake_monet = self.forward(photo_img)
                 loss = self.mse_loss(fake_monet, monet_img)
