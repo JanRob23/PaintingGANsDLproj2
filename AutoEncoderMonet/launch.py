@@ -40,8 +40,8 @@ def go(monet, photos):
         else:
             ae.load_model(load_checkpoint('current.ckpt'))
         
-
-    ae.train(img_dl)
+    print(ae.epoch)
+    # ae.train(img_dl)
 
     plt.xlabel("Epochs")
     plt.ylabel("Losses")

@@ -61,6 +61,7 @@ class autoencoder(nn.Module):
 
     def train(self, image_dl):
         for epoch in self.training_range:
+            print(self.epoch)
             self.epoch = epoch
             start_time = time.time()
             avg_loss = 0.0
