@@ -3,6 +3,7 @@ from imgaug.imgaug import show_grid
 import matplotlib.pyplot as plt
 import glob
 import numpy as np
+from torch._C import DeviceObjType
 from tqdm.notebook import tqdm
 from tqdm import tqdm as cputqdm
 import torch
@@ -24,6 +25,7 @@ def go(monet, photos):
     photo_img, monet_img = next(iter(img_dl))
 
     ae = autoencoder(50, device)
+    ae.to(device)
 
     save_dict = {
         'epoch': 0,
