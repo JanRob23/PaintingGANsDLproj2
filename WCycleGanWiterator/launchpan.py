@@ -26,7 +26,7 @@ def go(monet, photos):
         'optimizer_desc': gan.Adam_desc.state_dict()
     }
     save_checkpoint(save_dict, 'init.ckpt')
-
+    print('----Now Running: Gradient Penalty Version----')
     gan.train(img_dl)
 
     plt.xlabel("Epochs")
