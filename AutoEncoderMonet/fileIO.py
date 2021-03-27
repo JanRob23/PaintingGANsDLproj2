@@ -36,7 +36,10 @@ class ImageDataset(Dataset):
         photo_img = self.transform(photo_img)
         monet_img = Image.open(f'{self.monet_dir}/{self.idx}.jpg')
         monet_img = self.transform(monet_img)
-        self.idx +=1
+        if self.idx == self.__len__:
+            self.idx =1
+        else :
+            self.idx +=1
         return photo_img, monet_img
 
     def __len__(self):

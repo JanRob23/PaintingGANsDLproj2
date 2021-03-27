@@ -22,6 +22,7 @@ def go(monet, photos):
     set_seed(719)
     img_ds = ImageDataset(monet, photos)
     img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
+    print(img_dl.__len__())
     photo_img, monet_img = next(iter(img_dl))
 
     ae = autoencoder(30, device)
