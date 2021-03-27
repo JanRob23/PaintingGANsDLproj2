@@ -14,11 +14,10 @@ import torch.nn as nn
 import torch.nn.functional as F 
 
 class autoencoder(nn.Module):
-    def __init__(self, epochs, device, start_lr=2e-4, decay_epoch=0):
+    def __init__(self, epochs, device, start_lr=2e-4):
         super(autoencoder, self).__init__()
         self.epochs = epochs
         self.device = device
-        self.decay_epoch = decay_epoch if decay_epoch > 0 else int(self.epochs/2)
         self.mse_loss = nn.MSELoss()
         self.loss_stats = AvgStats()
         
