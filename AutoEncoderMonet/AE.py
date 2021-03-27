@@ -1,4 +1,3 @@
-from AutoEncoderMonet.utils import AvgStats
 import os
 import time
 import torch
