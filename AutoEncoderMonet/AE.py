@@ -64,7 +64,7 @@ class autoencoder(nn.Module):
                 t = tqdm(image_dl, leave=False, total=image_dl.__len__())
             
             for i, (photo_real, monet_real) in enumerate(t):
-                photo_img, monet_img = photo_real.to(self.device), monet_real.to(self.device)
+                photo_img, monet_img = photo_real.float().to(self.device), monet_real.float().to(self.device)
                 update_req_grad([self], False)
                 self.opt.zero_grad()
                 fake_monet = self.forward(photo_img)
