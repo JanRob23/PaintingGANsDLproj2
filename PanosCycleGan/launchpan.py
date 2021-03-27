@@ -11,10 +11,10 @@ def go(monet, photos):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     set_seed(719)
     img_ds = ImageDataset(monet, photos)
-    img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
+    img_dl = DataLoader(img_ds, batch_size=5, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
-    gan = CycleGAN(3, 3, 10, device)
+    gan = CycleGAN(3, 3, 30, device)
 
     save_dict = {
         'epoch': 0,
@@ -22,8 +22,8 @@ def go(monet, photos):
         'gen_ptm': gan.gen_ptm.state_dict(),
         'desc_m': gan.desc_m.state_dict(),
         'desc_p': gan.desc_p.state_dict(),
-        'optimizer_gen': gan.adam_gen.state_dict(),
-        'optimizer_desc': gan.adam_desc.state_dict()
+        'optimizer_gen': gan.RMSprop_gen.state_dict(),
+        'optimizer_desc': gan.RMSprop_desc.state_dict()
     }
     save_checkpoint(save_dict, 'init.ckpt')
 
@@ -51,10 +51,26 @@ def go(monet, photos):
         ax[i, 1].axis("off")
     plt.show()
 
-    ph_ds = PhotoDataset('../content/data/')
+    ph_ds = PhotoDataset('/content/data/photos')
     ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
 
+    trans = transforms.ToPILImage()
+    ###Save images
+    if os.path.isfile('current.ckpt'):
+        if device == 'cpu':
+            t = cputqdm(ph_dl, leave=False, total=ph_dl.__len__())
+        else:
+            t = tqdm(ph_dl, leave=False, total=ph_dl.__len__())
+
+
+    for i, photo in enumerate(t):
+        with torch.no_grad():
+            pred_monet = gan.gen_ptm(photo.to(device)).cpu().detach()
+        pred_monet = unnorm(pred_monet)
+        img = trans(pred_monet[0]).convert("RGB")
+        img.save('content/PaintingGANs_DL_proj2/PanosCycleGan/customMonet/' + str(i + 1) + '.jpg')
+
 if __name__ == "__main__":
-    #monet = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/augs'
-    #photos = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/photo_jpg'
+    monet = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/augs'
+    photos = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/photo_jpg'
     go(monet, photos)
