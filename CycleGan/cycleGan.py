@@ -229,26 +229,26 @@ class CycleGAN(object):
                 
                 t.set_postfix(gen_loss=total_gen_loss.item(), desc_loss=total_desc_loss.item())
 
-            save_dict = {
-                'epoch': epoch+1,
-                'gen_mtp': self.gen_mtp.state_dict(),
-                'gen_ptm': self.gen_ptm.state_dict(),
-                'desc_m': self.desc_m.state_dict(),
-                'desc_p': self.desc_p.state_dict(),
-                'optimizer_gen': self.adam_gen.state_dict(),
-                'optimizer_desc': self.adam_desc.state_dict()
-            }
-            save_checkpoint(save_dict, 'current.ckpt')
-            
-            avg_gen_loss /= photo_dl.__len__()
-            avg_desc_loss /= photo_dl.__len__()
-            time_req = time.time() - start_time
-            
-            self.gen_stats.append(avg_gen_loss, time_req)
-            self.desc_stats.append(avg_desc_loss, time_req)
-            
-            print("Epoch: (%d) | Generator Loss:%f | Discriminator Loss:%f" % 
-                                                (epoch+1, avg_gen_loss, avg_desc_loss))
-      
-            self.gen_lr_sched.step()
-            self.desc_lr_sched.step()
+        save_dict = {
+            'epoch': epoch+1,
+            'gen_mtp': self.gen_mtp.state_dict(),
+            'gen_ptm': self.gen_ptm.state_dict(),
+            'desc_m': self.desc_m.state_dict(),
+            'desc_p': self.desc_p.state_dict(),
+            'optimizer_gen': self.adam_gen.state_dict(),
+            'optimizer_desc': self.adam_desc.state_dict()
+        }
+        save_checkpoint(save_dict, 'current.ckpt')
+        
+        avg_gen_loss /= photo_dl.__len__()
+        avg_desc_loss /= photo_dl.__len__()
+        time_req = time.time() - start_time
+        
+        self.gen_stats.append(avg_gen_loss, time_req)
+        self.desc_stats.append(avg_desc_loss, time_req)
+        
+        print("Epoch: (%d) | Generator Loss:%f | Discriminator Loss:%f" % 
+                                            (epoch+1, avg_gen_loss, avg_desc_loss))
+    
+        self.gen_lr_sched.step()
+        self.desc_lr_sched.step()
