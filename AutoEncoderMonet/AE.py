@@ -12,7 +12,7 @@ from utils import *
 from fileIO import *
 
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as F 
 
 class autoencoder(nn.Module):
     def __init__(self, epochs, device, start_lr=2e-4, decay_epoch=0):
@@ -85,9 +85,3 @@ class autoencoder(nn.Module):
             time_req = time.time() - start_time
             self.loss_stats.append(train_loss, time_req)
             print(f'Epoch: {epoch+1} | Loss:{train_loss}')
-    
-       
-        
-
-
-    
