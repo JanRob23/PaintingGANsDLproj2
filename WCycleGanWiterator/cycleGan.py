@@ -283,7 +283,7 @@ class CycleGAN(object):
 
                     # monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
                     # photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
-                    total_desc_loss = + monet_desc_loss + photo_desc_loss
+                    total_desc_loss = monet_desc_loss + photo_desc_loss
                     avg_desc_loss += total_desc_loss.item()
                     # Backward
                     monet_desc_loss.backward()
