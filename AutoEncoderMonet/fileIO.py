@@ -29,15 +29,16 @@ class ImageDataset(Dataset):
         for i, fl in enumerate(sorted(os.listdir(self.photo_dir))):
             self.photo_idx[i] = fl 
         self.idx = 1
-        self.range = len(self.monet_idx.keys()) 
+        self.range = len(self.monet_idx.keys())  
 
     def __getitem__(self, idx):
         photo_img = Image.open(f'{self.photo_dir}/photo{self.idx} .jpg')
         photo_img = self.transform(photo_img)
         monet_img = Image.open(f'{self.monet_dir}/{self.idx}.jpg')
         monet_img = self.transform(monet_img)
-        if self.idx == self.__len__:
-            self.idx =1
+        lenn = self.__len__()
+        if self.idx == lenn:
+            self.idx = 1
         else :
             self.idx +=1
         return photo_img, monet_img
