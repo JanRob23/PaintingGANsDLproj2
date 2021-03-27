@@ -59,9 +59,9 @@ class autoencoder(nn.Module):
             start_time = time.time()
             avg_loss = 0.0
             if self.device == 'cuda':
-                t = tqdmn(image_dl, leave=False, total=image_dl.__len__())
+                t = tqdmn(image_dl, leave=False, total=image_dl.__len__()- 1)
             else:
-                t = tqdm(image_dl, leave=False, total=image_dl.__len__())
+                t = tqdm(image_dl, leave=False, total=image_dl.__len__()- 1)
             
             for i, (photo_real, monet_real) in enumerate(t):
                 photo_img, monet_img = photo_real.float().to(self.device), monet_real.float().to(self.device)
