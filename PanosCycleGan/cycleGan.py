@@ -61,9 +61,6 @@ class Discriminator(nn.Module):
         return self.disc(x)
 
 class WassersteinGANLoss(nn.Module):
-    """WassersteinGANLoss
-    ref: Wasserstein GAN (https://arxiv.org/abs/1701.07875)
-    """
     def __init__(self):
         super(WassersteinGANLoss, self).__init__()
 
@@ -197,8 +194,8 @@ class CycleGAN(object):
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
-                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * self.lmbda
-                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * self.lmbda
+                cycle_loss_monet = - self.WassLoss(cycl_monet, monet_img) * self.lmbda
+                cycle_loss_photo = - self.WassLoss(cycl_photo, photo_img) * self.lmbda
 
                 monet_desc = self.desc_m(fake_monet)
                 photo_desc = self.desc_p(fake_photo)
@@ -223,6 +220,7 @@ class CycleGAN(object):
                 self.RMSprop_gen.step()
 
                 # Forward pass through Descriminator
+                #train iteration between Discriminators and Generators = 5:1
                 for i in range (0,5):
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.RMSprop_desc.zero_grad()
@@ -262,7 +260,7 @@ class CycleGAN(object):
 
                 #monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
                 #photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
-                    total_desc_loss =- monet_desc_loss - photo_desc_loss
+                    total_desc_loss = - monet_desc_loss - photo_desc_loss
                     avg_desc_loss += total_desc_loss.item()
                 # Backward
                 #Weight clip value : play around with it :)
