@@ -9,6 +9,7 @@ import torch
 from numpy import asarray
 import os.path
 from torch.utils.data import DataLoader
+import torchvision.transforms as transforms
 from utils import *
 from fileIO import *
 from cycleGan import *
@@ -40,7 +41,7 @@ def go(monet, photos):
         else:
             gan.load_model(load_checkpoint('current.ckpt'))
 
-    #gan.train(img_dl)
+    gan.train(img_dl)
 
     # plt.xlabel("Epochs")
     # plt.ylabel("Losses")
