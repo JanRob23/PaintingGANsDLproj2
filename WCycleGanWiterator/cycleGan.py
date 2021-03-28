@@ -130,6 +130,7 @@ def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_n
         actv
     )
 
+
 class CycleGAN(object):
     def __init__(self, in_ch, out_ch, epochs, device, start_lr=2e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
         self.epochs = epochs
@@ -203,10 +204,6 @@ class CycleGAN(object):
 
                 real = torch.ones(monet_desc.size()).to(self.device)
 
-                #####Standard adv losses
-                # adv_loss_monet = self.mse_loss(monet_desc, real)
-                # adv_loss_photo = self.mse_loss(photo_desc, real)
-
                 #######WASSENSTEIN GAN LOSSES!
                 adv_loss_monet = self.WassLossWPenalty(monet_desc, real=None, generator_loss = True,desc = None,device = 'cuda')
                 adv_loss_photo = self.WassLossWPenalty(photo_desc, real=None, generator_loss = True,desc = None,device = 'cuda')
@@ -248,7 +245,7 @@ class CycleGAN(object):
                                                             generator_loss=False,
                                                             desc= self.desc_m, device = 'cuda')/2
 
-                    photo_desc_loss = self.WassLossWPenalty(photo_desc_fake,
+                    photo_desc_loss = self.WassLossWPenalty(fake =photo_desc_fake,
                                                             real =photo_desc_real,input_im= photo_img
                                                             , generated= generated_photo,
                                                             generator_loss=False,
