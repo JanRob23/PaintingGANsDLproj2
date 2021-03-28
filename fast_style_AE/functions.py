@@ -30,7 +30,7 @@ def train(image_dl, device):
     vgg = VGG16()
     vgg.to(device)
     # Define optimizer and loss
-    optimizer = torch.optim.Adam(ae.parameters(),lr = learning_rate, betas=(0.5, 0.999))
+    opt = torch.optim.Adam(ae.parameters(),lr = learning_rate, betas=(0.5, 0.999))
     l2_loss = torch.nn.MSELoss().to(ae.device)
 
     for epoch in ae.training_range:
@@ -45,7 +45,7 @@ def train(image_dl, device):
         for i, (content_style, monet_style) in enumerate(t):
             photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
             # update_req_grad([self.encoder, self.decoder], False)
-            ae.opt.zero_grad()
+            opt.zero_grad()
             fake_monet = ae.forward(photo_img)
             # get content loss
             features_original = vgg.forward(photo_img)
@@ -63,7 +63,7 @@ def train(image_dl, device):
             loss = style_loss + content_loss
 
             loss.backward()
-            ae.opt.step()
+            opt.step()
             avg_loss += loss.item()
 
         save_dict = {
