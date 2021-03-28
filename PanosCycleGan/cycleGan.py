@@ -68,8 +68,8 @@ class WassersteinGANLoss(nn.Module):
         if generator_loss:
             wloss = -fake.mean()
         else:
-            wloss = -real.mean() + fake.mean()
-        return wloss
+            wloss = -.mean() + fake.mean()
+        return wlossreal
 
 
 
@@ -217,7 +217,7 @@ class CycleGAN(object):
 
                 # Forward pass through Descriminator
                 #train iteration between Discriminators and Generators = 5:1
-                for i in range (0,5):
+                for i in range (0,3):
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.RMSprop_desc.zero_grad()
 
