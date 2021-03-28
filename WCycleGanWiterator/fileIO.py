@@ -69,11 +69,14 @@ class PhotoDataset(Dataset):
             ])
         for i, fl in enumerate(os.listdir(self.photo_dir)):
             self.photo_idx[i] = fl
+        self.idx = 1
 
     def __getitem__(self, idx):
-        photo_path = os.path.join(self.photo_dir, self.photo_idx[idx])
+       #photo_path = os.path.join(self.photo_dir, self.photo_idx[idx])
+        photo_path = Image.open(f'{self.photo_dir}/photo{self.idx} .jpg')
         photo_img = Image.open(photo_path)
         photo_img = self.transform(photo_img)
+        self.idx += 1
         return photo_img
 
     def __len__(self):
