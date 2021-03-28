@@ -217,7 +217,7 @@ class CycleGAN(object):
 
                 # Forward pass through Descriminator
                 #train iteration between Discriminators and Generators = 5:1
-                for i in range (0,3):
+                for i in range (0,5):
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.RMSprop_desc.zero_grad()
 
@@ -248,7 +248,7 @@ class CycleGAN(object):
                     avg_desc_loss += total_desc_loss.item()
                 # Backward
                 #Weight clip value : play around with it :)
-                    clip= 0.009
+                    clip= 0.01
                     monet_desc_loss.backward()
                     photo_desc_loss.backward()
                     self.RMSprop_desc.step()
