@@ -244,6 +244,9 @@ class CycleGAN(object):
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.Adam_desc.zero_grad()
 
+                    generated_monet = self.gen_mtp(photo_img)
+                    generated_photo = self.gen_ptm(monet_img)
+
                     fake_monet = self.sample_monet([fake_monet.cpu().data.numpy()])[0]
                     fake_photo = self.sample_photo([fake_photo.cpu().data.numpy()])[0]
                     fake_monet = torch.tensor(fake_monet).to(self.device)
@@ -260,13 +263,13 @@ class CycleGAN(object):
                     # Wassenstein loss for critics (+GRADIENT PENALTY)
                     #Not sure if im diong the loss correct here
                     monet_desc_loss = self.WassLossWPenalty(monet_desc_fake
-                                                            ,real = monet_desc_real, input_im= monet_img,
+                                                            ,real = monet_desc_real, input_im= generated_monet,
                                                             generated = fake_monet,
                                                             generator_loss=False,
                                                             desc= self.desc_m, device = 'cuda')/2
 
                     photo_desc_loss = self.WassLossWPenalty(photo_desc_fake,
-                                                            real =photo_desc_real,input_im= photo_img, generated= fake_photo,
+                                                            real =photo_desc_real,input_im= photo_img, generated= generated_photo,
                                                             generator_loss=False,
                                                             desc = self.desc_p,device ='cuda') / 2
 
