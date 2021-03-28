@@ -24,7 +24,7 @@ def go(monet, photos):
     img_ds = ImageDataset(monet, photos)
     img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
-    # ae = autoencoder(1, device)
+    ae = autoencoder(1, device)
     torch.set_grad_enabled(True)
     #
     # save_dict = {
@@ -51,11 +51,17 @@ def go(monet, photos):
     _, ax = plt.subplots(5, 2, figsize=(12, 12))
     for i in range(5):
         photo_img, _ = next(iter(img_dl))
-        pred_monet = ae(photo_img.to(device)).cpu().detach()
+        inp = photo_img.to(device)
+        pred_monet = ae(inp).cpu().detach()
         photo_img = unnorm(photo_img)
         pred_monet = unnorm(pred_monet)
+        if i == 1:
+            print(pred_monet)
+            print(photo_img)
+
         
         ax[i, 0].imshow(photo_img[0].permute(1, 2, 0))
+        print("----")
         ax[i, 1].imshow(pred_monet[0].permute(1, 2, 0))
         ax[i, 0].set_title("Input Photo")
         ax[i, 1].set_title("Monet-esque Photo")
