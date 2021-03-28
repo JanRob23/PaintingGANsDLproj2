@@ -11,7 +11,7 @@ def go(monet, photos):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     set_seed(719)
     img_ds = ImageDataset(monet, photos)
-    img_dl = DataLoader(img_ds, batch_size=5, pin_memory=True)
+    img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
     gan = CycleGAN(3, 3, 1, device)
@@ -51,7 +51,7 @@ def go(monet, photos):
         ax[i, 1].axis("off")
     plt.show()
 
-    ph_ds = PhotoDataset('/content/data/photos/photo_jpg/')
+    ph_ds = PhotoDataset('/data/photos/photo_jpg/')
     ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
 
     trans = transforms.ToPILImage()
@@ -68,7 +68,7 @@ def go(monet, photos):
             pred_monet = gan.gen_ptm(photo.to(device)).cpu().detach()
         pred_monet = unnorm(pred_monet)
         img = trans(pred_monet[0]).convert("RGB")
-        img.save('/content/PaintingGANs_DL_proj2/PanosCycleGan/customMonet' + str(i + 1) + '.jpg')
+        img.save('customMonet/' + str(i + 1) + '.jpg')
 
 if __name__ == "__main__":
     monet = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/augs'
