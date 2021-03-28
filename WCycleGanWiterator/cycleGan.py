@@ -246,19 +246,17 @@ class CycleGAN(object):
 
                     generated_monet = self.gen_mtp(photo_img)
                     generated_photo = self.gen_ptm(monet_img)
-
+                    print(generated_photo.shape,generated_monet.shape)
                     fake_monet = self.sample_monet([fake_monet.cpu().data.numpy()])[0]
                     fake_photo = self.sample_photo([fake_photo.cpu().data.numpy()])[0]
-                    fake_photo_grad= fake_photo
-                    fake_monet_grad = fake_monet
                     fake_monet = torch.tensor(fake_monet).to(self.device)
                     fake_photo = torch.tensor(fake_photo).to(self.device)
-                    print(fake_monet.shape,'fakemonet')
+
                     monet_desc_real = self.desc_m(monet_img)
                     monet_desc_fake = self.desc_m(fake_monet)
                     photo_desc_real = self.desc_p(photo_img)
                     photo_desc_fake = self.desc_p(fake_photo)
-                    print(monet_desc_fake.shape, 'fakemonetwoahhhh')
+                    
 
                     # Descriminator losses
 
