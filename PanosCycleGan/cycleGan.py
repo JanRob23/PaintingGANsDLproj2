@@ -129,7 +129,7 @@ def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_n
 
 
 class CycleGAN(object):
-    def __init__(self, in_ch, out_ch, epochs, device, start_lr=2e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
+    def __init__(self, in_ch, out_ch, epochs, device, start_lr=1e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
         self.epochs = epochs
         self.decay_epoch = decay_epoch if decay_epoch > 0 else int(self.epochs/2)
         self.lmbda = lmbda
@@ -248,7 +248,7 @@ class CycleGAN(object):
                     avg_desc_loss += total_desc_loss.item()
                 # Backward
                 #Weight clip value : play around with it :)
-                    clip= 0.01
+                    clip= 0.009
                     monet_desc_loss.backward()
                     photo_desc_loss.backward()
                     self.RMSprop_desc.step()
