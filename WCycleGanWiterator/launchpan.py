@@ -51,7 +51,7 @@ def go(monet, photos):
         ax[i, 1].axis("off")
     plt.show()
 
-    ph_ds = PhotoDataset('/data/photos/photo_jpg/'))
+    ph_ds = PhotoDataset('data/photos/photo_jpg'))
     ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
 
     trans = transforms.ToPILImage()
