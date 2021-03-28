@@ -70,8 +70,7 @@ class autoencoder(nn.Module):
             nn.Conv2d(3, 3, 3, 1, 1),  # keeps it same
             nn.ReLU(),
             nn.Conv2d(3, 3, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
-            nn.Sigmoid()
+            nn.Tanh()
         )
         self.opt = torch.optim.Adam(self.parameters(),lr = start_lr, betas=(0.5, 0.999))
         self.epoch = 0

@@ -23,14 +23,14 @@ def gram_matrix(y):
 def train(image_dl, device):
     # HYPERPARAMETERS
     learning_rate = 2e-4
-    lambda_content = 0.6
-    lambda_style = 0.4
-    ae = autoencoder(10, device)
+    lambda_content = 1e5
+    lambda_style = 1e10
+    ae = autoencoder(20, device)
     ae.to(device)
     vgg = VGG16()
     vgg.to(device)
     # Define optimizer and loss
-    optimizer = torch.optim.Adam(ae.parameters(),lr = learning_rate, betas=(0.5, 0.999))
+    opt = torch.optim.Adam(ae.parameters(),lr = learning_rate, betas=(0.5, 0.999))
     l2_loss = torch.nn.MSELoss().to(ae.device)
 
     for epoch in ae.training_range:
@@ -45,26 +45,26 @@ def train(image_dl, device):
         for i, (content_style, monet_style) in enumerate(t):
             photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
             # update_req_grad([self.encoder, self.decoder], False)
-            ae.opt.zero_grad()
+            opt.zero_grad()
             fake_monet = ae.forward(photo_img)
-
+            if i < 2:
+                used_monet = monet_img
             # get content loss
             features_original = vgg.forward(photo_img)
             features_transformed = vgg.forward(fake_monet)
             content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
             # Extract style features
-            features_style_original = vgg.forward(monet_img)
+            features_style_original = vgg.forward(used_monet)
             style_loss = 0
             for ft_y, ft_s in zip(features_transformed, features_style_original):
                 gm_y = gram_matrix(ft_y)
                 gm_s = gram_matrix(ft_s)
                 style_loss += l2_loss(gm_y, gm_s)
-
             style_loss = lambda_style * style_loss
             loss = style_loss + content_loss
 
             loss.backward()
-            ae.opt.step()
+            opt.step()
             avg_loss += loss.item()
 
         save_dict = {
