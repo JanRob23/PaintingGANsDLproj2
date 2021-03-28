@@ -75,7 +75,7 @@ class WassersteinGANLoss(nn.Module):
         else:
             wloss = -real.mean() + fake.mean()
             #Grad_penalty
-            BATCH_SIZE, C, H, W = real.shape
+            BATCH_SIZE, C, H, W = input_im.shape
             epsilon = torch.rand((BATCH_SIZE, 1, 1, 1)).repeat(1, C, H, W).to(device)
             inter_images = input_im * epsilon + generated * (1 - epsilon)
             mixed_scores = desc(inter_images)
@@ -266,7 +266,7 @@ class CycleGAN(object):
 
                     # Wassenstein loss for critics (+GRADIENT PENALTY)
                     #Not sure if im diong the loss correct here
-                    monet_desc_loss = self.WassLossWPenalty(monet_desc_fake
+                    monet_desc_loss = self.WassLossWPenalty(fake = monet_desc_fake
                                                             ,real = monet_desc_real, input_im= monet_img,
                                                             generated = generated_monet,
                                                             generator_loss=False,
