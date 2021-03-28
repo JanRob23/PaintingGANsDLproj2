@@ -5,6 +5,7 @@
 /CycleGan/images
 /AutoEncoderMonet/Data
 /AutoEncoderMonet/current.ckpt
+/fast_style_AE/Data
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
