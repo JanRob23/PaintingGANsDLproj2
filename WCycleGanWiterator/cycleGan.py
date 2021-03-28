@@ -265,13 +265,13 @@ class CycleGAN(object):
                     # Wassenstein loss for critics (+GRADIENT PENALTY)
                     #Not sure if im diong the loss correct here
                     monet_desc_loss = self.WassLossWPenalty(monet_desc_fake
-                                                            ,real = monet_desc_real, input_im= torch.reshape(monet_img,[256,256]),
+                                                            ,real = monet_desc_real, input_im= monet_img,
                                                             generated = generated_monet,
                                                             generator_loss=False,
                                                             desc= self.desc_m, device = 'cuda')/2
 
                     photo_desc_loss = self.WassLossWPenalty(photo_desc_fake,
-                                                            real =photo_desc_real,input_im= torch.reshape(photo_img_grad,[256,256])
+                                                            real =photo_desc_real,input_im= photo_img
                                                             , generated= generated_photo,
                                                             generator_loss=False,
                                                             desc = self.desc_p,device ='cuda') / 2
