@@ -21,12 +21,11 @@ def go(monet, photos):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print(device)
     set_seed(719)
-    img_ds = ImageDataset(photos,monet)
+    img_ds = ImageDataset(monet, photos)
     img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
     print(monet_img.shape)
-    ae = autoencoder(30, device)
-    ae.to(device)
+    ae = autoencoder(1, device)
     torch.set_grad_enabled(True)
 
     save_dict = {
@@ -42,7 +41,7 @@ def go(monet, photos):
         else:
             ae.load_model(load_checkpoint('current.ckpt'))
 
-    train(img_dl, device)
+    ae = train(img_dl, device)
 
     plt.xlabel("Epochs")
     plt.ylabel("Losses")

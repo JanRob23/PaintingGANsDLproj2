@@ -33,8 +33,8 @@ class ImageDataset(Dataset):
 
     def __getitem__(self, idx):
         rand_idx = int(np.random.uniform(0, len(self.monet_idx.keys())))
-        photo_path = os.path.join(self.photo_dir, self.photo_idx[idx])
-        monet_path = os.path.join(self.monet_dir, self.monet_idx[rand_idx])
+        photo_path = os.path.join(self.photo_dir, self.photo_idx[rand_idx])
+        monet_path = os.path.join(self.monet_dir, self.monet_idx[idx])
         photo_img = Image.open(photo_path)
         photo_img = self.transform(photo_img)
         monet_img = Image.open(monet_path)
