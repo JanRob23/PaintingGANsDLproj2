@@ -24,22 +24,21 @@ def go(monet, photos):
     img_ds = ImageDataset(monet, photos)
     img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
-    print(monet_img.shape)
-    ae = autoencoder(1, device)
+    # ae = autoencoder(1, device)
     torch.set_grad_enabled(True)
-
-    save_dict = {
-        'epoch': 0,
-        'weights': ae.state_dict(),
-        'optimizer': ae.opt.state_dict()
-    }
-    save_checkpoint(save_dict, 'init.ckpt')
-
-    if os.path.isfile('current.ckpt'):
-        if device == 'cpu':
-            ae.load_model(load_checkpoint('current.ckpt', map_location = torch.device('cpu')))
-        else:
-            ae.load_model(load_checkpoint('current.ckpt'))
+    #
+    # save_dict = {
+    #     'epoch': 0,
+    #     'weights': ae.state_dict(),
+    #     'optimizer': ae.opt.state_dict()
+    # }
+    # save_checkpoint(save_dict, 'init.ckpt')
+    #
+    # if os.path.isfile('current.ckpt'):
+    #     if device == 'cpu':
+    #         ae.load_model(load_checkpoint('current.ckpt', map_location = torch.device('cpu')))
+    #     else:
+    #         ae.load_model(load_checkpoint('current.ckpt'))
 
     ae = train(img_dl, device)
 
