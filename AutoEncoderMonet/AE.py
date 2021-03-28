@@ -1,6 +1,7 @@
 import os
 import time
 import torch
+from torch._C import TracingState
 import torchvision
 from torch import nn
 
@@ -23,30 +24,28 @@ class autoencoder(nn.Module):
         
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, 17, 1, 0), # 256 - 17 + 1 -> 240
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.MaxPool2d(6, 2), # 240 - 6 / 2 + 1 -> 119
             nn.Conv2d(64, 128, 6, 1, 0), # 119 - 6 + 1 -> 114
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.MaxPool2d(4, 2), # 114 -4 /2 + 1 -> 56
             nn.Conv2d(128, 256, 4, 2), # 56 - 6 / 2 + 1 -> 26
-            nn.ReLU()
+            nn.LeakyReLU()
         )
 
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2), #54
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(128, 64, 4, 2), # 110
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(64, 32, 6, 2, 0), #226
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(32, 16, 16, 1), #241
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(16, 3, 18, 1), #256
-            nn.Sigmoid()
         )
         self.opt = torch.optim.Adam(self.parameters(),lr = start_lr, betas=(0.5, 0.999))
         self.epoch = 0
-        self.training_range = range(self.epoch ,self.epochs)
 
     def forward(self, x):
         x = self.encoder(x)
@@ -60,8 +59,8 @@ class autoencoder(nn.Module):
 
 
     def train(self, image_dl):
-        for epoch in self.training_range:
-            print(self.epoch)
+        training_range = range(self.epoch, self.epochs) 
+        for epoch in training_range:
             self.epoch = epoch
             start_time = time.time()
             avg_loss = 0.0
