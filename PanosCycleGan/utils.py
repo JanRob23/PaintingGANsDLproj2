@@ -51,7 +51,7 @@ def update_req_grad(models, requires_grad=True):
             param.requires_grad = requires_grad
 
 # https://arxiv.org/pdf/1612.07828.pdf
-# Save 50 generated fake imgs and sample through them
+# Save 50 generated fake imgs and sampl through them
 # to feed discriminators to avoid large oscillations 
 # from iterations to iterations.
 class sample_fake(object):

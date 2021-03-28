@@ -69,17 +69,15 @@ class WassersteinGANLoss(nn.Module):
     def __init__(self):
         super(WassersteinGANLoss, self).__init__()
 
-    def __call__(self, fake, real=None, generator_loss=True,lmbda=10,desc = None, device = 'cpu'):
+    def __call__(self, fake, real=None,generated=None,input_im= None, generator_loss=True,lmbda=10,desc = None, device = 'cpu'):
         if generator_loss:
             wloss = -fake.mean()
         else:
             wloss = -real.mean() + fake.mean()
             #Grad_penalty
             BATCH_SIZE, C, H, W = real.shape
-            print(BATCH_SIZE,C,H,W, 'woah')
             epsilon = torch.rand((BATCH_SIZE, 1, 1, 1)).repeat(1, C, H, W).to(device)
             inter_images = real * epsilon + fake * (1 - epsilon)
-            print(inter_images.shape(), 'interimageshape')
             mixed_scores = desc(inter_images)
             gradient = torch.autograd.grad(inputs =  inter_images,
                                          outputs = mixed_scores,
@@ -256,35 +254,22 @@ class CycleGAN(object):
                     photo_desc_real = self.desc_p(photo_img)
                     photo_desc_fake = self.desc_p(fake_photo)
                     print(monet_desc_fake.shape, 'fakemonetwoahhhh')
-                    real = torch.ones(monet_desc_real.size()).to(self.device)
-                    fake = torch.ones(monet_desc_fake.size()).to(self.device)
 
                     # Descriminator losses
-                    # --------------------
-
-                    # modify to wassenstein gan loss
-
-                    # monet_desc_real_loss = self.mse_loss(monet_desc_real, real)
-                    # monet_desc_fake_loss = self.mse_loss(monet_desc_fake, fake)
-                    # photo_desc_real_loss = self.mse_loss(photo_desc_real, real)
-                    # photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
 
                     # Wassenstein loss for critics (+GRADIENT PENALTY)
-                    # monet_gradient_pen = Grad_penalty(CycleGAN,monet_desc_real,monet_desc_fake , device='cuda')
-                    # photo_gradient_pen = Grad_penalty(CycleGAN, photo_desc_real, photo_desc_fake, device='cuda')
-
-                    monet_desc_loss = self.WassLossWPenalty(monet_desc_fake,
-                                                            monet_desc_real,
+                    #Not sure if im diong the loss correct here
+                    monet_desc_loss = self.WassLossWPenalty(monet_desc_fake
+                                                            ,real = monet_desc_real, input_im= monet_img,
+                                                            generated = fake_monet,
                                                             generator_loss=False,
                                                             desc= self.desc_m, device = 'cuda')/2
 
                     photo_desc_loss = self.WassLossWPenalty(photo_desc_fake,
-                                                            photo_desc_real,
+                                                            real =photo_desc_real,input_im= photo_img, generated= fake_photo,
                                                             generator_loss=False,
                                                             desc = self.desc_p,device ='cuda') / 2
 
-                    # monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
-                    # photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
                     total_desc_loss = monet_desc_loss + photo_desc_loss
                     avg_desc_loss += total_desc_loss.item()
                     # Backward

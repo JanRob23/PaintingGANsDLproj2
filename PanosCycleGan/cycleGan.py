@@ -230,6 +230,8 @@ class CycleGAN(object):
                     fake_monet = torch.tensor(fake_monet).to(self.device)
                     fake_photo = torch.tensor(fake_photo).to(self.device)
 
+
+
                     monet_desc_real = self.desc_m(monet_img)
                     monet_desc_fake = self.desc_m(fake_monet)
                     photo_desc_real = self.desc_p(photo_img)
@@ -241,25 +243,10 @@ class CycleGAN(object):
                 # Descriminator losses
                 # --------------------
 
-                #modify to wassenstein gan loss
-
-                #monet_desc_real_loss = self.mse_loss(monet_desc_real, real)
-                #monet_desc_fake_loss = self.mse_loss(monet_desc_fake, fake)
-                #photo_desc_real_loss = self.mse_loss(photo_desc_real, real)
-                #photo_desc_fake_loss = self.mse_loss(photo_desc_fake, fake)
-
-                #Wassenstein loss for critics (+GRADIENT PENALTY)
-                   # lambda =10
-                   # monet_gradient_pen = Grad_penalty(CycleGAN,monet_desc_real,monet_desc_fake , device='cuda')
-                   # photo_gradient_pen = Grad_penalty(CycleGAN, photo_desc_real, photo_desc_fake, device='cuda')
-
                     monet_desc_loss = self.WassLoss(monet_desc_fake,monet_desc_real,generator_loss = False)/2
 
                     photo_desc_loss = self.WassLoss(photo_desc_fake,photo_desc_real,generator_loss = False)/2
 
-
-                #monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
-                #photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
                     total_desc_loss = monet_desc_loss + photo_desc_loss
                     avg_desc_loss += total_desc_loss.item()
                 # Backward
