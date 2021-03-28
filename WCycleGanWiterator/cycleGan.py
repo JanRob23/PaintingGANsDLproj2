@@ -257,8 +257,8 @@ class CycleGAN(object):
                     photo_desc_real = self.desc_p(photo_img)
                     photo_desc_fake = self.desc_p(fake_photo)
                     print('--------')
-                    print(photo_img)
-                    print(generated_monet)
+                    print(photo_img.shape)
+                    print(generated_monet.shape)
 
                     # Descriminator losses
 
