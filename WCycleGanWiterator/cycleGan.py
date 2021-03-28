@@ -146,9 +146,9 @@ class CycleGAN(object):
         self.mse_loss = nn.MSELoss()
         self.l1_loss = nn.L1Loss()
         self.Adam_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
-                                               lr=start_lr , betas = (0.00,0.9))
+                                               lr=start_lr, betas=(0.00, 0.9))
         self.Adam_desc = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
-                                                lr=start_lr,betas = (0.00,0.9))
+                                                lr=start_lr, betas=(0.00, 0.9))
         self.sample_monet = sample_fake()
         self.sample_photo = sample_fake()
         gen_lr = lr_sched(self.decay_epoch, self.epochs)
@@ -184,8 +184,8 @@ class CycleGAN(object):
                 fake_photo = self.gen_mtp(monet_img)
                 fake_monet = self.gen_ptm(photo_img)
 
-                cycl_monet = self.gen_ptm(fake_photo)  #
-                cycl_photo = self.gen_mtp(fake_monet)  #
+                cycl_monet = self.gen_ptm(fake_photo)
+                cycl_photo = self.gen_mtp(fake_monet)
 
                 id_monet = self.gen_ptm(monet_img)
                 id_photo = self.gen_mtp(photo_img)
@@ -196,8 +196,8 @@ class CycleGAN(object):
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
-                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * 20
-                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * 20
+                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * 10
+                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * 10
 
                 monet_desc = self.desc_m(fake_monet)
                 photo_desc = self.desc_p(fake_photo)
@@ -240,13 +240,13 @@ class CycleGAN(object):
                     # Wassenstein loss for critics (+GRADIENT PENALTY)
                     #Not sure if im diong the loss correct here
                     monet_desc_loss = self.WassLossWPenalty(fake = monet_desc_fake
-                                                            ,real = monet_desc_real, input_im= monet_img,
+                                                            , real = monet_desc_real, input_im= monet_img,
                                                             generated = generated_monet,
                                                             generator_loss=False,
                                                             desc= self.desc_m, device = 'cuda')/2
 
                     photo_desc_loss = self.WassLossWPenalty(fake =photo_desc_fake,
-                                                            real =photo_desc_real,input_im= photo_img
+                                                            real =photo_desc_real, input_im= photo_img
                                                             , generated= generated_photo,
                                                             generator_loss=False,
                                                             desc = self.desc_p,device ='cuda') / 2
