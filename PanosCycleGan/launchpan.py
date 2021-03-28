@@ -36,8 +36,8 @@ def go(monet, photos):
     plt.legend()
     plt.show()
 
-    _, ax = plt.subplots(10, 2, figsize=(12, 12))
-    for i in range(10):
+    _, ax = plt.subplots(5, 2, figsize=(12, 12))
+    for i in range(5):
         photo_img, _ = next(iter(img_dl))
         pred_monet = gan.gen_ptm(photo_img.to(device)).cpu().detach()
         photo_img = unnorm(photo_img)
@@ -68,7 +68,7 @@ def go(monet, photos):
             pred_monet = gan.gen_ptm(photo.to(device)).cpu().detach()
         pred_monet = unnorm(pred_monet)
         img = trans(pred_monet[0]).convert("RGB")
-        img.save('content/PaintingGANs_DL_proj2/PanosCycleGan/customMonet/' + str(i + 1) + '.jpg')
+        img.save('content/Data/customMonet' + str(i + 1) + '.jpg')
 
 if __name__ == "__main__":
     monet = 'C:/Users/Panos/Desktop/DLgansproject/Data/DatasetCycleGAN/augs'
