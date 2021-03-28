@@ -25,14 +25,15 @@ def train(image_dl, device):
     learning_rate = 2e-4
     lambda_content = 1e5
     lambda_style = 1e10
-    ae = autoencoder(20, device)
+    ae = autoencoder(10, device)
     ae.to(device)
     vgg = VGG16()
     vgg.to(device)
     # Define optimizer and loss
     opt = torch.optim.Adam(ae.parameters(),lr = learning_rate, betas=(0.5, 0.999))
     l2_loss = torch.nn.MSELoss().to(ae.device)
-
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
     for epoch in ae.training_range:
         ae.epoch = epoch
         start_time = time.time()
@@ -51,7 +52,7 @@ def train(image_dl, device):
                 used_monet = monet_img
             # get content loss
             features_original = vgg.forward(photo_img)
-            features_transformed = vgg.forward(fake_monet)
+            features_transformed = vgg.forward(normalize(fake_monet))
             content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
             # Extract style features
             features_style_original = vgg.forward(used_monet)
