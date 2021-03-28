@@ -54,12 +54,11 @@ def train(image_dl, device):
             content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
             # Extract style features
             features_style_original = vgg.forward(monet_img)
-            features_style_fake = vgg.forward(fake_monet)
             style_loss = 0
             for ft_y, ft_s in zip(features_transformed, features_style_original):
                 gm_y = gram_matrix(ft_y)
                 gm_s = gram_matrix(ft_s)
-                style_loss += l2_loss(gm_y, gm_s[: 256, :, :])
+                style_loss += l2_loss(gm_y, gm_s)
 
             style_loss = lambda_style * style_loss
             loss = style_loss + content_loss
