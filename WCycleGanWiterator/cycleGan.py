@@ -196,8 +196,8 @@ class CycleGAN(object):
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
-                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * 10
-                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * 10
+                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * 14
+                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * 14
 
                 monet_desc = self.desc_m(fake_monet)
                 photo_desc = self.desc_p(fake_photo)
