@@ -255,7 +255,7 @@ class CycleGAN(object):
                     monet_desc_fake = self.desc_m(fake_monet)
                     photo_desc_real = self.desc_p(photo_img)
                     photo_desc_fake = self.desc_p(fake_photo)
-
+                    print(fake_monet.shape, 'fakemonetwoahhhh')
                     real = torch.ones(monet_desc_real.size()).to(self.device)
                     fake = torch.ones(monet_desc_fake.size()).to(self.device)
 
