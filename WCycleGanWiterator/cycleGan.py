@@ -250,7 +250,7 @@ class CycleGAN(object):
                     fake_photo = self.sample_photo([fake_photo.cpu().data.numpy()])[0]
                     fake_monet = torch.tensor(fake_monet).to(self.device)
                     fake_photo = torch.tensor(fake_photo).to(self.device)
-
+                    print(fake_monet.shape,'fakemonet')
                     monet_desc_real = self.desc_m(monet_img)
                     monet_desc_fake = self.desc_m(fake_monet)
                     photo_desc_real = self.desc_p(photo_img)
