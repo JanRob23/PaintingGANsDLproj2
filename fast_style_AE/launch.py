@@ -47,12 +47,14 @@ def go(monet, photos):
     plt.plot(ae.loss_stats.losses, 'b', label='Loss')
     plt.legend()
     plt.show()
-
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
     _, ax = plt.subplots(5, 2, figsize=(12, 12))
     for i in range(5):
         photo_img, _ = next(iter(img_dl))
         inp = photo_img.to(device)
         pred_monet = ae(inp).cpu().detach()
+        pred_monet = normalize(pred_monet)
         photo_img = unnorm(photo_img)
         pred_monet = unnorm(pred_monet)
         if i == 1:

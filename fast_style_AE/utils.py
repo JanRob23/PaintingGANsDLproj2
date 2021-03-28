@@ -5,7 +5,7 @@ import random
 import torch
 import torch.nn.init as init
 
-def unnorm(img, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]):
+def unnorm(img, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
     for t, m, s in zip(img, mean, std):
         t.mul_(s).add_(s)
         
