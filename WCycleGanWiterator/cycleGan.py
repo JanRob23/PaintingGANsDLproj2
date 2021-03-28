@@ -77,7 +77,7 @@ class WassersteinGANLoss(nn.Module):
             #Grad_penalty
             BATCH_SIZE, C, H, W = real.shape
             epsilon = torch.rand((BATCH_SIZE, 1, 1, 1)).repeat(1, C, H, W).to(device)
-            inter_images = real * epsilon + fake * (1 - epsilon)
+            inter_images = input_im * epsilon + generated * (1 - epsilon)
             mixed_scores = desc(inter_images)
             gradient = torch.autograd.grad(inputs =  inter_images,
                                          outputs = mixed_scores,
