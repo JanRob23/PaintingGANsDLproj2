@@ -58,7 +58,6 @@ def train(image_dl, device):
                 gm_y = gram_matrix(ft_y)
                 gm_s = gram_matrix(ft_s)
                 style_loss += l2_loss(gm_y, gm_s)
-
             style_loss = lambda_style * style_loss
             loss = style_loss + content_loss
 
