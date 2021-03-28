@@ -23,9 +23,9 @@ def gram_matrix(y):
 def train(image_dl, device):
     # HYPERPARAMETERS
     learning_rate = 2e-4
-    lambda_content = 0.6
-    lambda_style = 0.4
-    ae = autoencoder(10, device)
+    lambda_content = 1e5
+    lambda_style = 1e10
+    ae = autoencoder(20, device)
     ae.to(device)
     vgg = VGG16()
     vgg.to(device)
@@ -47,12 +47,14 @@ def train(image_dl, device):
             # update_req_grad([self.encoder, self.decoder], False)
             opt.zero_grad()
             fake_monet = ae.forward(photo_img)
+            if i < 2:
+                used_monet = monet_img
             # get content loss
             features_original = vgg.forward(photo_img)
             features_transformed = vgg.forward(fake_monet)
             content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
             # Extract style features
-            features_style_original = vgg.forward(monet_img)
+            features_style_original = vgg.forward(used_monet)
             style_loss = 0
             for ft_y, ft_s in zip(features_transformed, features_style_original):
                 gm_y = gram_matrix(ft_y)
