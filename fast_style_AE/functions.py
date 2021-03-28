@@ -25,7 +25,7 @@ def train(image_dl, device):
     learning_rate = 2e-4
     lambda_content = 0.6
     lambda_style = 0.4
-    ae = autoencoder(30, device)
+    ae = autoencoder(10, device)
     ae.to(device)
     vgg = VGG16()
     vgg.to(device)
@@ -77,3 +77,5 @@ def train(image_dl, device):
         time_req = time.time() - start_time
         ae.loss_stats.append(avg_loss, time_req)
         print(f'Epoch: {epoch +1} | Loss:{avg_loss}')
+
+    return ae
