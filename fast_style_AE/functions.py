@@ -47,7 +47,8 @@ def train(image_dl, device):
             # update_req_grad([self.encoder, self.decoder], False)
             ae.opt.zero_grad()
             fake_monet = ae.forward(photo_img)
-
+            print(fake_monet)
+            print(monet_img)
             # get content loss
             features_original = vgg.forward(photo_img)
             features_transformed = vgg.forward(fake_monet)

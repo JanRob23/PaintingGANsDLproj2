@@ -38,7 +38,7 @@ class autoencoder(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(4, 2), # 114 -4 /2 + 1 -> 56
             nn.Conv2d(128, 128, 4, 2), # 56 - 6 / 2 + 1 -> 26
-            nn.ReLU()
+            nn.Tanh()
         )
 
         self.decoder = nn.Sequential(
@@ -70,8 +70,7 @@ class autoencoder(nn.Module):
             nn.Conv2d(3, 3, 3, 1, 1),  # keeps it same
             nn.ReLU(),
             nn.Conv2d(3, 3, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
-            nn.Sigmoid()
+            nn.Tanh()
         )
         self.opt = torch.optim.Adam(self.parameters(),lr = start_lr, betas=(0.5, 0.999))
         self.epoch = 0
