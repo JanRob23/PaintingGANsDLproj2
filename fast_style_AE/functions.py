@@ -49,18 +49,16 @@ def train(image_dl, device):
             fake_monet = ae.forward(photo_img)
 
             # get content loss
-            features_original = vgg(photo_img)
-            features_transformed = vgg(fake_monet)
+            features_original = vgg.forward(photo_img)
+            features_transformed = vgg.forward(fake_monet)
             content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
             # Extract style features
-            features_style_original = vgg(monet_style)
-            features_style_fake = vgg(fake_monet)
+            features_style_original = vgg.forward(monet_img)
+            features_style_fake = vgg.forward(fake_monet)
             style_loss = 0
             for ft_y, ft_s in zip(features_transformed, features_style_original):
                 gm_y = gram_matrix(ft_y)
                 gm_s = gram_matrix(ft_s)
-                print(gm_s.shape)
-                print(gm_y.shape)
                 style_loss += l2_loss(gm_y, gm_s[: 256, :, :])
 
             style_loss = lambda_style * style_loss
