@@ -14,7 +14,7 @@ def go(monet, photos):
     img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
-    gan = CycleGAN(3, 3, 20, device)
+    gan = CycleGAN(3, 3, 1, device)
 
     save_dict = {
         'epoch': 0,
@@ -36,8 +36,8 @@ def go(monet, photos):
     plt.legend()
     plt.show()
 
-    _, ax = plt.subplots(10, 2, figsize=(12, 12))
-    for i in range(10):
+    _, ax = plt.subplots(200, 2, figsize=(12, 12))
+    for i in range(200):
         photo_img, _ = next(iter(img_dl))
         pred_monet = gan.gen_ptm(photo_img.to(device)).cpu().detach()
         photo_img = unnorm(photo_img)
