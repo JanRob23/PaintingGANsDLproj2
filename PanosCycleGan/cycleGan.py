@@ -129,7 +129,7 @@ def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_n
 
 
 class CycleGAN(object):
-    def __init__(self, in_ch, out_ch, epochs, device, start_lr=1e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
+    def __init__(self, in_ch, out_ch, epochs, device, start_lr=2e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
         self.epochs = epochs
         self.decay_epoch = decay_epoch if decay_epoch > 0 else int(self.epochs/2)
         self.lmbda = lmbda
@@ -194,8 +194,8 @@ class CycleGAN(object):
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
-                cycle_loss_monet =  self.l1_loss(cycl_monet, monet_img) * 10
-                cycle_loss_photo =  self.l1_loss(cycl_photo, photo_img) * 10
+                cycle_loss_monet =  self.l1_loss(cycl_monet, monet_img) * 14
+                cycle_loss_photo =  self.l1_loss(cycl_photo, photo_img) * 14
 
                 monet_desc = self.desc_m(fake_monet)
                 photo_desc = self.desc_p(fake_photo)
@@ -217,7 +217,7 @@ class CycleGAN(object):
 
                 # Forward pass through Descriminator
                 #train iteration between Discriminators and Generators = 5:1
-                for i in range (0,5):
+                for i in range (0,3):
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.RMSprop_desc.zero_grad()
 
