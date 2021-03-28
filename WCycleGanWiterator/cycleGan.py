@@ -259,6 +259,8 @@ class CycleGAN(object):
                     print('--------')
                     print(photo_img.shape)
                     print(generated_monet.shape)
+                    print(monet_img.shape)
+                    print(generated_photo.shape)
 
                     # Descriminator losses
 
