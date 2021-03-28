@@ -189,7 +189,7 @@ class CycleGAN(object):
                 id_photo = self.gen_mtp(photo_img)
 
                 # generator losses - identity, Adversarial, cycle consistency
-                #cycle consistency loss is left as Standard GAN,modifying only the lmabda
+                #cycle consistency loss is left as Standard GAN
 
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
@@ -201,7 +201,6 @@ class CycleGAN(object):
                 photo_desc = self.desc_p(fake_photo)
 
                 real = torch.ones(monet_desc.size()).to(self.device)
-
 
                 #######WASSENSTEIN GAN LOSSES!
                 adv_loss_monet = self.WassLoss(monet_desc,real=None,generator_loss=True)
@@ -237,11 +236,15 @@ class CycleGAN(object):
 
                 # Descriminator losses
                 # --------------------
+                #modify to wassenstein gan loss
                     monet_desc_loss = self.WassLoss(monet_desc_fake,monet_desc_real,generator_loss = False)/2
 
                     photo_desc_loss = self.WassLoss(photo_desc_fake,photo_desc_real,generator_loss = False)/2
 
-                    total_desc_loss = monet_desc_loss + photo_desc_loss
+
+                #monet_desc_loss = (monet_desc_real_loss + monet_desc_fake_loss) / 2
+                #photo_desc_loss = (photo_desc_real_loss + photo_desc_fake_loss) / 2
+                    total_desc_loss =  monet_desc_loss + photo_desc_loss
                     avg_desc_loss += total_desc_loss.item()
                 # Backward
                 #Weight clip value : play around with it :)
