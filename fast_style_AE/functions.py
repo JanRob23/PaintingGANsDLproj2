@@ -26,7 +26,7 @@ def train(image_dl, device):
     lambda_content = 0.6
     lambda_style = 0.4
     ae = autoencoder(1, device)
-    ae = ae.to(device)
+    ae.to(device)
     vgg = VGG16()
     # Define optimizer and loss
     optimizer = torch.optim.Adam(ae.parameters(),lr = learning_rate, betas=(0.5, 0.999))
