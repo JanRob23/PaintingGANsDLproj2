@@ -25,7 +25,7 @@ def train(image_dl, device):
     learning_rate = 2e-4
     lambda_content = 0.6
     lambda_style = 0.4
-    ae = autoencoder(1, device)
+    ae = autoencoder(30, device)
     ae.to(device)
     vgg = VGG16()
     vgg.to(device)
