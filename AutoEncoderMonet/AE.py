@@ -22,27 +22,79 @@ class autoencoder(nn.Module):
         self.mse_loss = nn.MSELoss()
         self.loss_stats = AvgStats()
         
+        # self.encoder = nn.Sequential(
+        #     nn.Conv2d(3, 64, 17, 1, 0), # 256 - 17 + 1 -> 240
+        #     nn.LeakyReLU(),
+        #     nn.MaxPool2d(6, 2), # 240 - 6 / 2 + 1 -> 119
+        #     nn.Conv2d(64, 128, 6, 1, 0), # 119 - 6 + 1 -> 114
+        #     nn.LeakyReLU(),
+        #     nn.MaxPool2d(4, 2), # 114 -4 /2 + 1 -> 56
+        #     nn.Conv2d(128, 256, 4, 2), # 56 - 6 / 2 + 1 -> 26
+        #     nn.LeakyReLU()
+        # )
+
+        # self.decoder = nn.Sequential(
+        #     nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2), #54
+        #     nn.LeakyReLU(),
+        #     nn.ConvTranspose2d(128, 64, 4, 2), # 110
+        #     nn.LeakyReLU(),
+        #     nn.ConvTranspose2d(64, 32, 6, 2, 0), #226
+        #     nn.LeakyReLU(),
+        #     nn.ConvTranspose2d(32, 16, 16, 1), #241
+        #     nn.LeakyReLU(),
+        #     nn.ConvTranspose2d(16, 3, 18, 1), #256
+        # )
+
+
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, 17, 1, 0), # 256 - 17 + 1 -> 240
-            nn.LeakyReLU(),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, 3, 1, 1), # 240 - 3 + 2 + 1 -> 240
+            nn.ReLU(),
+            nn.Conv2d(64, 64, 3, 1, 1),  # 240 - 3 + 2 + 1 -> 240
+            nn.ReLU(),
             nn.MaxPool2d(6, 2), # 240 - 6 / 2 + 1 -> 119
             nn.Conv2d(64, 128, 6, 1, 0), # 119 - 6 + 1 -> 114
-            nn.LeakyReLU(),
+            nn.ReLU(),
+            nn.Conv2d(128, 128, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
+            nn.Conv2d(128, 128, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
             nn.MaxPool2d(4, 2), # 114 -4 /2 + 1 -> 56
-            nn.Conv2d(128, 256, 4, 2), # 56 - 6 / 2 + 1 -> 26
-            nn.LeakyReLU()
+            nn.Conv2d(128, 128, 4, 2), # 56 - 6 / 2 + 1 -> 26
+            nn.ReLU()
         )
 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2), #54
-            nn.LeakyReLU(),
-            nn.ConvTranspose2d(128, 64, 4, 2), # 110
-            nn.LeakyReLU(),
+            nn.ConvTranspose2d(128, 128, kernel_size=4, stride=2), #54
+            nn.ReLU(),
+            nn.Conv2d(128, 128, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
+            nn.Conv2d(128, 64, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
+            nn.ConvTranspose2d(64, 64, 4, 2), # 110
+            nn.ReLU(),
+            nn.Conv2d(64, 64, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
+            nn.Conv2d(64, 64, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
             nn.ConvTranspose2d(64, 32, 6, 2, 0), #226
-            nn.LeakyReLU(),
+            nn.ReLU(),
+            nn.Conv2d(32, 32, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
+            nn.Conv2d(32, 32, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
             nn.ConvTranspose2d(32, 16, 16, 1), #241
-            nn.LeakyReLU(),
+            nn.ReLU(),
+            nn.Conv2d(16, 16, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
+            nn.Conv2d(16, 16, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
             nn.ConvTranspose2d(16, 3, 18, 1), #256
+            nn.Conv2d(3, 3, 3, 1, 1),  # keeps it same
+            nn.ReLU(),
+            nn.Conv2d(3, 3, 3, 1, 1),  # keeps it same
+            nn.Tanh()
         )
         self.opt = torch.optim.Adam(self.parameters(),lr = start_lr, betas=(0.5, 0.999))
         self.epoch = 0
