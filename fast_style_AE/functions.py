@@ -49,7 +49,7 @@ def train(image_dl, device):
             # update_req_grad([self.encoder, self.decoder], False)
             opt.zero_grad()
             fake_monet = ae.forward(photo_img)
-            if i < 1 and epoch == 1:
+            if i < 1 and epoch == 0:
                 used_monet = monet_img
                 features_style = vgg.forward(used_monet)
                 gram_style = [gram_matrix(y) for y in features_style]
