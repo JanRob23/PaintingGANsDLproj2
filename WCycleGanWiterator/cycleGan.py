@@ -132,7 +132,7 @@ def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_n
 
 
 class CycleGAN(object):
-    def __init__(self, in_ch, out_ch, epochs, device, start_lr=1e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
+    def __init__(self, in_ch, out_ch, epochs, device, start_lr=1e-4, lmbda=5, idt_coef=0.5, decay_epoch=0):
         self.epochs = epochs
         self.decay_epoch = decay_epoch if decay_epoch > 0 else int(self.epochs / 2)
         self.lmbda = lmbda
@@ -146,9 +146,9 @@ class CycleGAN(object):
         self.mse_loss = nn.MSELoss()
         self.l1_loss = nn.L1Loss()
         self.Adam_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
-                                               lr = start_lr, betas=(0.00, 0.9))
+                                                betas=(0.00, 0.9))
         self.Adam_desc = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
-                                                lr = start_lr, betas=(0.00, 0.9))
+                                                 betas=(0.00, 0.9))
         self.sample_monet = sample_fake()
         self.sample_photo = sample_fake()
         gen_lr = lr_sched(self.decay_epoch, self.epochs)
@@ -196,8 +196,8 @@ class CycleGAN(object):
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
-                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * 10
-                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * 10
+                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * self.lmbda
+                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * self.lmbda
 
                 monet_desc = self.desc_m(fake_monet)
                 photo_desc = self.desc_p(fake_photo)
