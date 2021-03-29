@@ -69,7 +69,7 @@ class WassersteinGANLoss(nn.Module):
     def __init__(self):
         super(WassersteinGANLoss, self).__init__()
 
-    def __call__(self, fake, real=None,generated=None,input_im= None, generator_loss=True,lmbda=20,desc = None, device = 'cpu'):
+    def __call__(self, fake, real=None,generated=None,input_im= None, generator_loss=True,lmbda=25,desc = None, device = 'cpu'):
         if generator_loss:
             wloss = -fake.mean()
         else:
@@ -132,7 +132,7 @@ def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_n
 
 
 class CycleGAN(object):
-    def __init__(self, in_ch, out_ch, epochs, device, start_lr=1e-4, lmbda=5, idt_coef=0.5, decay_epoch=0):
+    def __init__(self, in_ch, out_ch, epochs, device, start_lr=1e-4, lmbda=2.5, idt_coef=0.5, decay_epoch=0):
         self.epochs = epochs
         self.decay_epoch = decay_epoch if decay_epoch > 0 else int(self.epochs / 2)
         self.lmbda = lmbda
@@ -193,8 +193,8 @@ class CycleGAN(object):
                 # generator losses - identity, Adversarial, cycle consistency
                 # cycle consistency loss is left as Standard GAN
 
-               #idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
-               # idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
+               idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
+                idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
                 cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * self.lmbda
                 cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * self.lmbda
