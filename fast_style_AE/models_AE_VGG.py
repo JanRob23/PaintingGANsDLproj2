@@ -119,6 +119,7 @@ class VGG16(torch.nn.Module):
 class TransformerNet(torch.nn.Module):
     def __init__(self):
         super(TransformerNet, self).__init__()
+        self.loss_stats = AvgStats()
         self.model = nn.Sequential(
             ConvBlock(3, 32, kernel_size=9, stride=1),
             ConvBlock(32, 64, kernel_size=3, stride=2),

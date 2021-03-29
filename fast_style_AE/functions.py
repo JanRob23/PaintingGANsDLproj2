@@ -26,7 +26,7 @@ def train(image_dl, device):
     learning_rate = 2e-5
     lambda_content = 1e5
     lambda_style = 1e5
-    ae = autoencoder(30, device)
+    ae = autoencoder(15, device)
     ae.to(device)
     transformer_net = TransformerNet()
     transformer_net.to(device)
@@ -84,7 +84,7 @@ def train(image_dl, device):
         save_checkpoint(save_dict, 'current.ckpt')
         avg_loss /= image_dl.__len__()
         time_req = time.time() - start_time
-        ae.loss_stats.append(avg_loss, time_req)
+        transformer_net.loss_stats.append(avg_loss, time_req)
         print(f'Epoch: {epoch +1} | Loss:{avg_loss}')
 
     return transformer_net
