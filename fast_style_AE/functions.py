@@ -25,8 +25,8 @@ def train(image_dl, device):
     # HYPERPARAMETERS
     learning_rate = 2e-4
     lambda_content = 1e5
-    lambda_style = 1e10
-    ae = autoencoder(10, device)
+    lambda_style = 1e5
+    ae = autoencoder(20, device)
     ae.to(device)
     vgg = VGG16()
     vgg.to(device)
@@ -49,12 +49,12 @@ def train(image_dl, device):
             # update_req_grad([self.encoder, self.decoder], False)
             opt.zero_grad()
             fake_monet = ae.forward(photo_img)
-            if i < 1:
+            if i < 1 and epoch == 0:
                 used_monet = monet_img
                 features_style = vgg.forward(used_monet)
                 gram_style = [gram_matrix(y) for y in features_style]
                 print("Monet used for transfer")
-                monet_img.cpu().detach()
+                monet_img = monet_img.cpu().detach()
                 monet_img = unnorm(monet_img)
                 plt.imshow(monet_img[0].permute(1, 2, 0))
                 plt.show()
