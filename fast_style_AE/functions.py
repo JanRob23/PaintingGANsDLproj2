@@ -3,10 +3,11 @@ import time
 import torch
 import torchvision
 from torch import nn
-
+import matplotlib.pyplot as plt
 import itertools
 from tqdm.notebook import tqdm as tqdmn
 from tqdm import tqdm
+from PIL import Image
 from utils import *
 from fileIO import *
 from models_AE_VGG import *
@@ -23,16 +24,17 @@ def gram_matrix(y):
 def train(image_dl, device):
     # HYPERPARAMETERS
     learning_rate = 2e-4
-    lambda_content = 0.6
-    lambda_style = 0.4
-    ae = autoencoder(30, device)
+    lambda_content = 1e5
+    lambda_style = 1e5
+    ae = autoencoder(20, device)
     ae.to(device)
     vgg = VGG16()
     vgg.to(device)
     # Define optimizer and loss
-    optimizer = torch.optim.Adam(ae.parameters(),lr = learning_rate, betas=(0.5, 0.999))
+    opt = torch.optim.Adam(ae.parameters(),lr = learning_rate, betas=(0.5, 0.999))
     l2_loss = torch.nn.MSELoss().to(ae.device)
-
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
     for epoch in ae.training_range:
         ae.epoch = epoch
         start_time = time.time()
@@ -45,26 +47,32 @@ def train(image_dl, device):
         for i, (content_style, monet_style) in enumerate(t):
             photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
             # update_req_grad([self.encoder, self.decoder], False)
-            ae.opt.zero_grad()
+            opt.zero_grad()
             fake_monet = ae.forward(photo_img)
-
+            if i < 1 and epoch == 0:
+                used_monet = monet_img
+                features_style = vgg.forward(used_monet)
+                gram_style = [gram_matrix(y) for y in features_style]
+                print("Monet used for transfer")
+                monet_img = monet_img.cpu().detach()
+                monet_img = unnorm(monet_img)
+                plt.imshow(monet_img[0].permute(1, 2, 0))
+                plt.show()
             # get content loss
             features_original = vgg.forward(photo_img)
             features_transformed = vgg.forward(fake_monet)
             content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
             # Extract style features
-            features_style_original = vgg.forward(monet_img)
+            features_style_original = vgg.forward(used_monet)
             style_loss = 0
-            for ft_y, ft_s in zip(features_transformed, features_style_original):
+            for ft_y, gm_s in zip(features_transformed, gram_style):
                 gm_y = gram_matrix(ft_y)
-                gm_s = gram_matrix(ft_s)
-                style_loss += l2_loss(gm_y, gm_s)
-
+                style_loss += l2_loss(gm_y, gm_s[: photo_img.size(0), :, :])
             style_loss = lambda_style * style_loss
             loss = style_loss + content_loss
 
             loss.backward()
-            ae.opt.step()
+            opt.step()
             avg_loss += loss.item()
 
         save_dict = {
@@ -77,3 +85,5 @@ def train(image_dl, device):
         time_req = time.time() - start_time
         ae.loss_stats.append(avg_loss, time_req)
         print(f'Epoch: {epoch +1} | Loss:{avg_loss}')
+
+    return ae

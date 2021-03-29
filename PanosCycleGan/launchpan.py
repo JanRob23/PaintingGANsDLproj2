@@ -14,7 +14,7 @@ def go(monet, photos):
     img_dl = DataLoader(img_ds, batch_size=6, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
-    gan = CycleGAN(3, 3, 30, device)
+    gan = CycleGAN(3, 3, 20, device)
 
     save_dict = {
         'epoch': 0,
@@ -22,8 +22,8 @@ def go(monet, photos):
         'gen_ptm': gan.gen_ptm.state_dict(),
         'desc_m': gan.desc_m.state_dict(),
         'desc_p': gan.desc_p.state_dict(),
-        'optimizer_gen': gan.RMSprop_gen.state_dict(),
-        'optimizer_desc': gan.RMSprop_desc.state_dict()
+        'optimizer_gen': gan.Adam_gen.state_dict(),
+        'optimizer_desc': gan.Adam_desc.state_dict()
     }
     save_checkpoint(save_dict, 'init.ckpt')
 

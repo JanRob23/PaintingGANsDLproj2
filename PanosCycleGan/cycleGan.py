@@ -111,25 +111,8 @@ def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_n
     )
 
 
-#class Grad_penalty(model, real, fake, device='cpu'):
-    #BATCH_SIZE, C, H, W = real.shape
-    #epsilon = torch.rand((BATCH_SIZE, 1, 1, 1)).repeat(1, C, H, W).to(device)
-    #inter_images = real * epsilon + fake * (1 - epsilon)
-    #mixed_scores = discriminator(inter_images)
-    #gradient = torch.autograd.grad(inputs =  inter_images,
-      #                             outputs = mixed_scores,
-     #                              grad_outputs=torch.ones_like(mixed_scores),
-     #                              create_graph = True,
-     #                              retain_graph = True,
-     #                              )[0]
-    #gradient = gradient.view(gradient.shape[0],-1)
-    #gradient_norm = gradient.norm(2,dim =1 )
-    #gradient_penalty = torch.mean((gradient_norm -1)**2)
-   # return gradient_penalty
-
-
 class CycleGAN(object):
-    def __init__(self, in_ch, out_ch, epochs, device, start_lr=2e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
+    def __init__(self, in_ch, out_ch, epochs, device, start_lr=3e-4, lmbda=10, idt_coef=0.5, decay_epoch=0):
         self.epochs = epochs
         self.decay_epoch = decay_epoch if decay_epoch > 0 else int(self.epochs/2)
         self.lmbda = lmbda
@@ -142,16 +125,16 @@ class CycleGAN(object):
         self.init_models()
         self.mse_loss = nn.MSELoss()
         self.l1_loss = nn.L1Loss()
-        self.RMSprop_gen = torch.optim.RMSprop(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
-                                         lr = start_lr)
-        self.RMSprop_desc = torch.optim.RMSprop(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
-                                          lr=start_lr)
+        self.Adam_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
+                                          lr = start_lr,betas=(0.00, 0.9))
+        self.Adam_desc = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
+                                           lr=start_lr,betas=(0.00, 0.9))
         self.sample_monet = sample_fake()
         self.sample_photo = sample_fake()
         gen_lr = lr_sched(self.decay_epoch, self.epochs)
         desc_lr = lr_sched(self.decay_epoch, self.epochs)
-        self.gen_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSprop_gen, gen_lr.step)
-        self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.RMSprop_desc, desc_lr.step)
+        self.gen_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.Adam_gen, gen_lr.step)
+        self.desc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.Adam_desc, desc_lr.step)
         self.gen_stats = AvgStats()
         self.desc_stats = AvgStats()
         self.WassLoss = WassersteinGANLoss()
@@ -176,7 +159,7 @@ class CycleGAN(object):
             for i, (photo_real, monet_real) in enumerate(t):
                 photo_img, monet_img = photo_real.to(self.device), monet_real.to(self.device)
                 update_req_grad([self.desc_m, self.desc_p], False)
-                self.RMSprop_gen.zero_grad()
+                self.Adam_gen.zero_grad()
 
                 #Forward pass through generator
                 fake_photo = self.gen_mtp(monet_img)
@@ -194,8 +177,8 @@ class CycleGAN(object):
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
-                cycle_loss_monet =  self.l1_loss(cycl_monet, monet_img) * 14
-                cycle_loss_photo =  self.l1_loss(cycl_photo, photo_img) * 14
+                cycle_loss_monet =  self.l1_loss(cycl_monet, monet_img) * 10
+                cycle_loss_photo =  self.l1_loss(cycl_photo, photo_img) * 10
 
                 monet_desc = self.desc_m(fake_monet)
                 photo_desc = self.desc_p(fake_photo)
@@ -213,13 +196,13 @@ class CycleGAN(object):
 
                 # backward pass
                 total_gen_loss.backward()
-                self.RMSprop_gen.step()
+                self.Adam_gen.step()
 
                 # Forward pass through Descriminator
                 #train iteration between Discriminators and Generators = 5:1
-                for i in range (0,3):
+                for i in range (0,5):
                     update_req_grad([self.desc_m, self.desc_p], True)
-                    self.RMSprop_desc.zero_grad()
+                    self.Adam_desc.zero_grad()
 
                     fake_monet = self.sample_monet([fake_monet.cpu().data.numpy()])[0]
                     fake_photo = self.sample_photo([fake_photo.cpu().data.numpy()])[0]
@@ -251,7 +234,7 @@ class CycleGAN(object):
                     clip= 0.01
                     monet_desc_loss.backward()
                     photo_desc_loss.backward()
-                    self.RMSprop_desc.step()
+                    self.Adam_desc.step()
                 #Clip both discriminator's weight to the given clipping value
                     for p in self.desc_m.parameters():
                         p.data.clamp_(-clip,clip)
@@ -267,8 +250,8 @@ class CycleGAN(object):
                 'gen_ptm': self.gen_ptm.state_dict(),
                 'desc_m': self.desc_m.state_dict(),
                 'desc_p': self.desc_p.state_dict(),
-                'optimizer_gen': self.RMSprop_gen.state_dict(),
-                'optimizer_desc': self.RMSprop_desc.state_dict()
+                'optimizer_gen': self.Adam_gen.state_dict(),
+                'optimizer_desc': self.Adam_desc.state_dict()
             }
             save_checkpoint(save_dict, 'current.ckpt')
             
