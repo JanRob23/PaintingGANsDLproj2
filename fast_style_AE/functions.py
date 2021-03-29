@@ -23,7 +23,7 @@ def gram_matrix(y):
 
 def train(image_dl, device):
     # HYPERPARAMETERS
-    learning_rate = 2e-4
+    learning_rate = 2e-6
     lambda_content = 1e5
     lambda_style = 1e5
     ae = autoencoder(20, device)
