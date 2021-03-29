@@ -57,7 +57,7 @@ def go(monet, photos):
         photo_img = unnorm(photo_img)
         pred_monet = unnorm(pred_monet)
         if i == 1:
-            print(pred_monet)
+            print(pred_monet[0])
             print(photo_img)
 
         
