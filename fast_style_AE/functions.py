@@ -23,15 +23,17 @@ def gram_matrix(y):
 
 def train(image_dl, device):
     # HYPERPARAMETERS
-    learning_rate = 2e-6
+    learning_rate = 2e-5
     lambda_content = 1e5
     lambda_style = 1e5
-    ae = autoencoder(20, device)
+    ae = autoencoder(30, device)
     ae.to(device)
+    transformer_net = TransformerNet()
+    transformer_net.to(device)
     vgg = VGG16()
     vgg.to(device)
     # Define optimizer and loss
-    opt = torch.optim.Adam(ae.parameters(),lr = learning_rate, betas=(0.5, 0.999))
+    opt = torch.optim.Adam(transformer_net.parameters(),lr = learning_rate, betas=(0.5, 0.999))
     l2_loss = torch.nn.MSELoss().to(ae.device)
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
@@ -48,8 +50,8 @@ def train(image_dl, device):
             photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
             # update_req_grad([self.encoder, self.decoder], False)
             opt.zero_grad()
-            fake_monet = ae.forward(photo_img)
-            if i < 1 and epoch == 0:
+            fake_monet = transformer_net.forward(photo_img)
+            if i == 0 and epoch == 0:
                 used_monet = monet_img
                 features_style = vgg.forward(used_monet)
                 gram_style = [gram_matrix(y) for y in features_style]
@@ -63,7 +65,6 @@ def train(image_dl, device):
             features_transformed = vgg.forward(fake_monet)
             content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
             # Extract style features
-            features_style_original = vgg.forward(used_monet)
             style_loss = 0
             for ft_y, gm_s in zip(features_transformed, gram_style):
                 gm_y = gram_matrix(ft_y)
@@ -86,4 +87,4 @@ def train(image_dl, device):
         ae.loss_stats.append(avg_loss, time_req)
         print(f'Epoch: {epoch +1} | Loss:{avg_loss}')
 
-    return ae
+    return transformer_net
