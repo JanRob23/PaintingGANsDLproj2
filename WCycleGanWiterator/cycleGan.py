@@ -146,9 +146,9 @@ class CycleGAN(object):
         self.mse_loss = nn.MSELoss()
         self.l1_loss = nn.L1Loss()
         self.Adam_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
-                                               lr=start_lr, betas=(0.00, 0.9))
+                                                betas=(0.00, 0.9))
         self.Adam_desc = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
-                                                lr=start_lr, betas=(0.00, 0.9))
+                                                 betas=(0.00, 0.9))
         self.sample_monet = sample_fake()
         self.sample_photo = sample_fake()
         gen_lr = lr_sched(self.decay_epoch, self.epochs)
@@ -196,8 +196,8 @@ class CycleGAN(object):
                 idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
-                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * 14
-                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * 14
+                cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * 10
+                cycle_loss_photo = self.l1_loss(cycl_photo, photo_img) * 10
 
                 monet_desc = self.desc_m(fake_monet)
                 photo_desc = self.desc_p(fake_photo)
@@ -219,7 +219,7 @@ class CycleGAN(object):
 
                 # Forward pass through Descriminator
                 # train iteration between Discriminators and Generators = 5:1
-                for i in range(0, 5):
+                for i in range(0, 3):
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.Adam_desc.zero_grad()
 
