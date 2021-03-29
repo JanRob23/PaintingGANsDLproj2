@@ -3,10 +3,11 @@ import time
 import torch
 import torchvision
 from torch import nn
-
+import matplotlib.pyplot as plt
 import itertools
 from tqdm.notebook import tqdm as tqdmn
 from tqdm import tqdm
+from PIL import Image
 from utils import *
 from fileIO import *
 from models_AE_VGG import *
@@ -48,19 +49,25 @@ def train(image_dl, device):
             # update_req_grad([self.encoder, self.decoder], False)
             opt.zero_grad()
             fake_monet = ae.forward(photo_img)
-            if i < 2:
+            if i < 1:
                 used_monet = monet_img
+                features_style = vgg.forward(used_monet)
+                gram_style = [gram_matrix(y) for y in features_style]
+                print("Monet used for transfer")
+                monet_img.cpu().detach()
+                monet_img = unnorm(monet_img)
+                plt.imshow(monet_img[0].permute(1, 2, 0))
+                plt.show()
             # get content loss
             features_original = vgg.forward(photo_img)
-            features_transformed = vgg.forward(normalize(fake_monet))
+            features_transformed = vgg.forward(fake_monet)
             content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
             # Extract style features
             features_style_original = vgg.forward(used_monet)
             style_loss = 0
-            for ft_y, ft_s in zip(features_transformed, features_style_original):
+            for ft_y, gm_s in zip(features_transformed, gram_style):
                 gm_y = gram_matrix(ft_y)
-                gm_s = gram_matrix(ft_s)
-                style_loss += l2_loss(gm_y, gm_s)
+                style_loss += l2_loss(gm_y, gm_s[: photo_img.size(0), :, :])
             style_loss = lambda_style * style_loss
             loss = style_loss + content_loss
 

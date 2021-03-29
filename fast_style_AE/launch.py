@@ -54,7 +54,6 @@ def go(monet, photos):
         photo_img, _ = next(iter(img_dl))
         inp = photo_img.to(device)
         pred_monet = ae(inp).cpu().detach()
-        pred_monet = normalize(pred_monet)
         photo_img = unnorm(photo_img)
         pred_monet = unnorm(pred_monet)
         if i == 1:
