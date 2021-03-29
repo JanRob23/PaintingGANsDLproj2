@@ -69,7 +69,7 @@ class WassersteinGANLoss(nn.Module):
     def __init__(self):
         super(WassersteinGANLoss, self).__init__()
 
-    def __call__(self, fake, real=None,generated=None,input_im= None, generator_loss=True,lmbda=10,desc = None, device = 'cpu'):
+    def __call__(self, fake, real=None,generated=None,input_im= None, generator_loss=True,lmbda=5,desc = None, device = 'cpu'):
         if generator_loss:
             wloss = -fake.mean()
         else:
@@ -148,7 +148,7 @@ class CycleGAN(object):
         self.Adam_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
                                                 betas=(0.00, 0.9))
         self.Adam_desc = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
-                                                 betas=(0.00, 0.9))
+                                                lr = start_lr, betas=(0.00, 0.9))
         self.sample_monet = sample_fake()
         self.sample_photo = sample_fake()
         gen_lr = lr_sched(self.decay_epoch, self.epochs)
@@ -219,7 +219,7 @@ class CycleGAN(object):
 
                 # Forward pass through Descriminator
                 # train iteration between Discriminators and Generators = 5:1
-                for i in range(0, 3):
+                for i in range(0, 5):
                     update_req_grad([self.desc_m, self.desc_p], True)
                     self.Adam_desc.zero_grad()
 
