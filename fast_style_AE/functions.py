@@ -54,7 +54,7 @@ def train(image_dl, device):
                 features_style = vgg.forward(used_monet)
                 gram_style = [gram_matrix(y) for y in features_style]
                 print("Monet used for transfer")
-                monet_img.cpu().detach()
+                monet_img = monet_img.cpu().detach()
                 monet_img = unnorm(monet_img)
                 plt.imshow(monet_img[0].permute(1, 2, 0))
                 plt.show()
