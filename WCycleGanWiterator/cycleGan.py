@@ -69,7 +69,7 @@ class WassersteinGANLoss(nn.Module):
     def __init__(self):
         super(WassersteinGANLoss, self).__init__()
 
-    def __call__(self, fake, real=None,generated=None,input_im= None, generator_loss=True,lmbda=5,desc = None, device = 'cpu'):
+    def __call__(self, fake, real=None,generated=None,input_im= None, generator_loss=True,lmbda=20,desc = None, device = 'cpu'):
         if generator_loss:
             wloss = -fake.mean()
         else:
@@ -146,7 +146,7 @@ class CycleGAN(object):
         self.mse_loss = nn.MSELoss()
         self.l1_loss = nn.L1Loss()
         self.Adam_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
-                                                betas=(0.00, 0.9))
+                                               lr = start_lr, betas=(0.00, 0.9))
         self.Adam_desc = torch.optim.Adam(itertools.chain(self.desc_m.parameters(), self.desc_p.parameters()),
                                                 lr = start_lr, betas=(0.00, 0.9))
         self.sample_monet = sample_fake()
