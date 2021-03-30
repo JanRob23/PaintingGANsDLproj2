@@ -14,7 +14,7 @@ def go(monet, photos):
     img_dl = DataLoader(img_ds, batch_size=5, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
-    gan = CycleGAN(3, 3, 30, device)
+    gan = CycleGAN(3, 3, 10, device)
 
     save_dict = {
         'epoch': 0,

@@ -73,7 +73,7 @@ class WassersteinGANLoss(nn.Module):
         if generator_loss:
             wloss = -fake.mean()
         else:
-            wloss = -real.mean() + fake.mean()
+            wloss = -(+real.mean() - fake.mean())
             #Grad_penalty
             BATCH_SIZE, C, H, W = input_im.shape
             epsilon = torch.rand((BATCH_SIZE, 1, 1, 1)).repeat(1, C, H, W).to(device)
