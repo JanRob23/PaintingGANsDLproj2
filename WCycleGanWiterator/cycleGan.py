@@ -193,7 +193,7 @@ class CycleGAN(object):
                 # generator losses - identity, Adversarial, cycle consistency
                 # cycle consistency loss is left as Standard GAN
 
-               idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
+                idt_loss_monet = self.l1_loss(id_monet, monet_img) * self.lmbda * self.idt_coef
                 idt_loss_photo = self.l1_loss(id_photo, photo_img) * self.lmbda * self.idt_coef
 
                 cycle_loss_monet = self.l1_loss(cycl_monet, monet_img) * self.lmbda
