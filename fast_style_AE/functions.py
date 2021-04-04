@@ -28,12 +28,12 @@ def train(image_dl, device):
     lambda_style = 1e10
     ae = autoencoder(20, device)
     ae.to(device)
-    transformer_net = TransformerNet()
+    transformer_net = TransformerNet(learning_rate)
     transformer_net.to(device)
     vgg = VGG16()
     vgg.to(device)
     # Define optimizer and loss
-    opt = torch.optim.Adam(transformer_net.parameters(),lr = learning_rate, betas=(0.5, 0.999))
+    opt = transformer_net.opt
     l2_loss = torch.nn.MSELoss().to(ae.device)
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
@@ -45,17 +45,18 @@ def train(image_dl, device):
             t = tqdmn(image_dl, leave=False, total=image_dl.__len__( )- 1)
         else:
             t = tqdm(image_dl, leave=False, total=image_dl.__len__( )- 1)
-        for j, (c_style, m_style) in enumerate(t):
-            photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)
-            if j == 15:
-                print("Painting used for style:")
-                used_monet = monet_img
-                features_style = vgg.forward(used_monet)
-                gram_style = [gram_matrix(y) for y in features_style]
-                monet_img = monet_img.cpu().detach()
-                monet_img = unnorm(monet_img)
-                plt.imshow(monet_img[0].permute(1, 2, 0))
-                plt.show()
+        if epoch == 0:
+            for j, (c_style, m_style) in enumerate(t):
+                photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)
+                if j == 15:
+                    print("Painting used for style:")
+                    used_monet = monet_img
+                    features_style = vgg.forward(used_monet)
+                    gram_style = [gram_matrix(y) for y in features_style]
+                    monet_img = monet_img.cpu().detach()
+                    monet_img = unnorm(monet_img)
+                    plt.imshow(monet_img[0].permute(1, 2, 0))
+                    plt.show()
         for i, (content_style, monet_style) in enumerate(t):
             photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
             # update_req_grad([self.encoder, self.decoder], False)
@@ -79,8 +80,8 @@ def train(image_dl, device):
 
         save_dict = {
             'epoch': epoch + 1,
-            'weights': ae.state_dict(),
-            'optimizer': ae.opt.state_dict()
+            'weights': transformer_net.state_dict(),
+            'optimizer': transformer_net.opt.state_dict()
         }
         save_checkpoint(save_dict, 'current.ckpt')
         avg_loss /= image_dl.__len__()

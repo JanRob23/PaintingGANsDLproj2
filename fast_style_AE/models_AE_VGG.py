@@ -113,7 +113,7 @@ class VGG16(torch.nn.Module):
 
 
 class TransformerNet(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, lr):
         super(TransformerNet, self).__init__()
         self.loss_stats = AvgStats()
         self.model = nn.Sequential(
@@ -129,6 +129,7 @@ class TransformerNet(torch.nn.Module):
             ConvBlock(64, 32, kernel_size=3, upsample=True),
             ConvBlock(32, 3, kernel_size=9, stride=1, normalize=False, relu=False),
         )
+        self.opt = torch.optim.Adam(self.parameters(), lr=lr, betas=(0.5, 0.999))
 
     def forward(self, x):
         return self.model(x)
