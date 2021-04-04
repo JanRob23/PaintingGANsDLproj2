@@ -26,7 +26,7 @@ def train(image_dl, device):
     learning_rate = 2e-4
     lambda_content = 1e5
     lambda_style = 1e10
-    ae = autoencoder(1, device)
+    ae = autoencoder(15, device)
     ae.to(device)
     transformer_net = TransformerNet(learning_rate)
     transformer_net.to(device)
