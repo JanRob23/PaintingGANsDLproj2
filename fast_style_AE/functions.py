@@ -28,7 +28,7 @@ def train(image_dl, device):
     lambda_style = 1e5
     ae = autoencoder(15, device)
     ae.to(device)
-    transformer_net = ae
+    transformer_net = TransformerNet()
     print(transformer_net)
     transformer_net.to(device)
     vgg = VGG16()
@@ -46,7 +46,13 @@ def train(image_dl, device):
             t = tqdmn(image_dl, leave=False, total=image_dl.__len__( )- 1)
         else:
             t = tqdm(image_dl, leave=False, total=image_dl.__len__( )- 1)
-
+        for j, (c_style, m_style) in enumerate(t):
+            photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)
+            print("Painting number:", j)
+            monet_img = monet_img.cpu().detach()
+            monet_img = unnorm(monet_img)
+            plt.imshow(monet_img[0].permute(1, 2, 0))
+            plt.show()
         for i, (content_style, monet_style) in enumerate(t):
             photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
             # update_req_grad([self.encoder, self.decoder], False)
