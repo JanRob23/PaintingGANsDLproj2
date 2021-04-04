@@ -25,51 +25,31 @@ class autoencoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, 17, 1, 0), # 256 - 17 + 1 -> 240
             nn.ReLU(),
-            nn.Conv2d(64, 64, 3, 1, 1), # 240 - 3 + 2 + 1 -> 240
-            nn.ReLU(),
-            nn.Conv2d(64, 64, 3, 1, 1),  # 240 - 3 + 2 + 1 -> 240
-            nn.ReLU(),
+            Conv2dSameBlock(64, 64),
             nn.MaxPool2d(6, 2), # 240 - 6 / 2 + 1 -> 119
             nn.Conv2d(64, 128, 6, 1, 0), # 119 - 6 + 1 -> 114
             nn.ReLU(),
-            nn.Conv2d(128, 128, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
-            nn.Conv2d(128, 128, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
+            Conv2dSameBlock(128, 128),
             nn.MaxPool2d(4, 2), # 114 -4 /2 + 1 -> 56
             nn.Conv2d(128, 128, 4, 2), # 56 - 6 / 2 + 1 -> 26
-            nn.ReLU()
+            Conv2dSameBlock(128, 128),
         )
 
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(128, 128, kernel_size=4, stride=2), #54
             nn.ReLU(),
-            nn.Conv2d(128, 128, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
-            nn.Conv2d(128, 64, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
+            Conv2dSameBlock(128, 64),
             nn.ConvTranspose2d(64, 64, 4, 2), # 110
             nn.ReLU(),
-            nn.Conv2d(64, 64, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
-            nn.Conv2d(64, 64, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
+            Conv2dSameBlock(64, 64),
             nn.ConvTranspose2d(64, 32, 6, 2, 0), #226
             nn.ReLU(),
-            nn.Conv2d(32, 32, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
-            nn.Conv2d(32, 32, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
+            Conv2dSameBlock(32, 32),
             nn.ConvTranspose2d(32, 16, 16, 1), #241
             nn.ReLU(),
-            nn.Conv2d(16, 16, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
-            nn.Conv2d(16, 16, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
+            Conv2dSameBlock(16, 16),
             nn.ConvTranspose2d(16, 3, 18, 1), #256
-            nn.Conv2d(3, 3, 3, 1, 1),  # keeps it same
-            nn.ReLU(),
-            nn.Conv2d(3, 3, 3, 1, 1),  # keeps it same
+            Conv2dSameBlock(3, 3),
             nn.Tanh()
         )
         self.opt = torch.optim.Adam(self.parameters(),lr = start_lr, betas=(0.5, 0.999))
@@ -79,6 +59,22 @@ class autoencoder(nn.Module):
     def forward(self, x):
         x = self.encoder(x)
         x = self.decoder(x)
+        return x
+
+class Conv2dSameBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(Conv2dSameBlock, self).__init__()
+        self.block = nn.Sequential(
+            nn.Conv2d(in_channels, in_channels, 3, 1, 1),
+            nn.BatchNorm2d(in_channels),
+            nn.ReLU(),
+            nn.Conv2d(in_channels, out_channels, 3, 1, 1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU()
+        )
+
+    def forward(self, x):
+        x = self.block(x)
         return x
 
 class VGG16(torch.nn.Module):
