@@ -34,11 +34,11 @@ def go(monet, photos):
     }
     save_checkpoint(save_dict, 'init.ckpt')
 
-    if os.path.isfile('current.ckpt'):
-        if device == 'cpu':
-            ae.load_model(load_checkpoint('current.ckpt', map_location = torch.device('cpu')))
-        else:
-            ae.load_model(load_checkpoint('current.ckpt'))
+    # if os.path.isfile('current.ckpt'):
+    #     if device == 'cpu':
+    #         ae.load_model(load_checkpoint('current.ckpt', map_location = torch.device('cpu')))
+    #     else:
+    #         ae.load_model(load_checkpoint('current.ckpt'))
 
 
 

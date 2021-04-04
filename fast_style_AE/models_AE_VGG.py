@@ -134,6 +134,11 @@ class TransformerNet(torch.nn.Module):
     def forward(self, x):
         return self.model(x)
 
+    def load_model(self, ckpt):
+        self.epoch = ckpt['epoch']
+        self.load_state_dict(ckpt['weights'])
+        self.opt.load_state_dict(ckpt['optimizer'])
+
 
 class ResidualBlock(torch.nn.Module):
     def __init__(self, channels):
