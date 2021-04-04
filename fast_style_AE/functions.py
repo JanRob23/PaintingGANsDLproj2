@@ -25,8 +25,8 @@ def train(image_dl, device):
     # HYPERPARAMETERS
     learning_rate = 2e-4
     lambda_content = 1e5
-    lambda_style = 1e10
-    ae = autoencoder(15, device)
+    lambda_style = 1e8
+    ae = autoencoder(20, device)
     ae.to(device)
     transformer_net = TransformerNet(learning_rate)
     transformer_net.to(device)

@@ -56,11 +56,6 @@ def go(monet, photos):
         pred_monet = ae(inp).cpu().detach()
         photo_img = unnorm(photo_img)
         pred_monet = unnorm(pred_monet)
-        if i == 1:
-            print(pred_monet[0])
-            print(photo_img)
-
-        
         ax[i, 0].imshow(photo_img[0].permute(1, 2, 0))
         print("----")
         ax[i, 1].imshow(pred_monet[0].permute(1, 2, 0))
