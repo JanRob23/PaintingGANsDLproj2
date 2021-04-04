@@ -6,12 +6,12 @@ from utils import *
 from fileIO import *
 from cycleGan import *
 
-
 def go(monet, photos):
+    
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     set_seed(719)
     img_ds = ImageDataset(monet, photos)
-    img_dl = DataLoader(img_ds, batch_size=5, pin_memory=True)
+    img_dl = DataLoader(img_ds, batch_size=6, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
     gan = CycleGAN(3, 3, 50, device)
@@ -26,7 +26,7 @@ def go(monet, photos):
         'optimizer_desc': gan.Adam_desc.state_dict()
     }
     save_checkpoint(save_dict, 'init.ckpt')
-    print('----Now Running: Gradient Penalty Version----')
+
     gan.train(img_dl)
 
     plt.xlabel("Epochs")
@@ -42,7 +42,7 @@ def go(monet, photos):
         pred_monet = gan.gen_ptm(photo_img.to(device)).cpu().detach()
         photo_img = unnorm(photo_img)
         pred_monet = unnorm(pred_monet)
-
+        
         ax[i, 0].imshow(photo_img[0].permute(1, 2, 0))
         ax[i, 1].imshow(pred_monet[0].permute(1, 2, 0))
         ax[i, 0].set_title("Input Photo")
@@ -61,6 +61,7 @@ def go(monet, photos):
             t = cputqdm(ph_dl, leave=False, total=ph_dl.__len__())
         else:
             t = tqdm(ph_dl, leave=False, total=ph_dl.__len__())
+
 
     for i, photo in enumerate(t):
         with torch.no_grad():
