@@ -23,13 +23,12 @@ def gram_matrix(y):
 
 def train(image_dl, device):
     # HYPERPARAMETERS
-    learning_rate = 2e-5
+    learning_rate = 2e-4
     lambda_content = 1e5
-    lambda_style = 1e5
-    ae = autoencoder(15, device)
+    lambda_style = 1e10
+    ae = autoencoder(20, device)
     ae.to(device)
     transformer_net = TransformerNet()
-    print(transformer_net)
     transformer_net.to(device)
     vgg = VGG16()
     vgg.to(device)
@@ -48,25 +47,20 @@ def train(image_dl, device):
             t = tqdm(image_dl, leave=False, total=image_dl.__len__( )- 1)
         for j, (c_style, m_style) in enumerate(t):
             photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)
-            print("Painting number:", j)
-            monet_img = monet_img.cpu().detach()
-            monet_img = unnorm(monet_img)
-            plt.imshow(monet_img[0].permute(1, 2, 0))
-            plt.show()
+            if j == 15:
+                print("Painting used for style:")
+                used_monet = monet_img
+                features_style = vgg.forward(used_monet)
+                gram_style = [gram_matrix(y) for y in features_style]
+                monet_img = monet_img.cpu().detach()
+                monet_img = unnorm(monet_img)
+                plt.imshow(monet_img[0].permute(1, 2, 0))
+                plt.show()
         for i, (content_style, monet_style) in enumerate(t):
             photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
             # update_req_grad([self.encoder, self.decoder], False)
             opt.zero_grad()
             fake_monet = transformer_net.forward(photo_img)
-            if i == 0 and epoch == 0:
-                used_monet = monet_img
-                features_style = vgg.forward(used_monet)
-                gram_style = [gram_matrix(y) for y in features_style]
-                print("Monet used for transfer")
-                monet_img = monet_img.cpu().detach()
-                monet_img = unnorm(monet_img)
-                plt.imshow(monet_img[0].permute(1, 2, 0))
-                plt.show()
             # get content loss
             features_original = vgg.forward(photo_img)
             features_transformed = vgg.forward(fake_monet)
