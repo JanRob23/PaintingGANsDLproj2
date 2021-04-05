@@ -26,10 +26,10 @@ def train(image_dl, device):
     learning_rate = 2e-4
     lambda_content = 1e5
     lambda_style = 1e8
-    ae = autoencoder(20, device)
+    ae = autoencoder(5, device)
     ae.to(device)
-    transformer_net = ae
-    #transformer_net.to(device)
+    transformer_net = TransformerNet(learning_rate)
+    transformer_net.to(device)
     vgg = VGG16()
     vgg.to(device)
     # Define optimizer and loss
@@ -45,38 +45,33 @@ def train(image_dl, device):
             t = tqdmn(image_dl, leave=False, total=image_dl.__len__( )- 1)
         else:
             t = tqdm(image_dl, leave=False, total=image_dl.__len__( )- 1)
-        if epoch == 0:
-            for j, (c_style, m_style) in enumerate(t):
-                photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)
-                if j == 15:
-                    print("Painting used for style:")
-                    used_monet = monet_img
-                    features_style = vgg.forward(used_monet)
-                    gram_style = [gram_matrix(y) for y in features_style]
-                    monet_img = monet_img.cpu().detach()
-                    monet_img = unnorm(monet_img)
-                    plt.imshow(monet_img[0].permute(1, 2, 0))
-                    plt.show()
-        for i, (content_style, monet_style) in enumerate(t):
-            photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
-            # update_req_grad([self.encoder, self.decoder], False)
-            opt.zero_grad()
-            fake_monet = transformer_net.forward(photo_img)
-            # get content loss
-            features_original = vgg.forward(photo_img)
-            features_transformed = vgg.forward(fake_monet)
-            content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
-            # Extract style features
-            style_loss = 0
-            for ft_y, gm_s in zip(features_transformed, gram_style):
-                gm_y = gram_matrix(ft_y)
-                style_loss += l2_loss(gm_y, gm_s[: photo_img.size(0), :, :])
-            style_loss = lambda_style * style_loss
-            loss = style_loss + content_loss
+        for j, (c_style, m_style) in enumerate(t):
+            photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)
+            used_monet = monet_img
+            features_style = vgg.forward(used_monet)
+            gram_style = [gram_matrix(y) for y in features_style]
+            if j == 50:
+                break
+            for i, (content_style, monet_style) in enumerate(t):
+                photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
+                # update_req_grad([self.encoder, self.decoder], False)
+                opt.zero_grad()
+                fake_monet = transformer_net.forward(photo_img)
+                # get content loss
+                features_original = vgg.forward(photo_img)
+                features_transformed = vgg.forward(fake_monet)
+                content_loss = lambda_content * l2_loss(features_original.relu2_2, features_transformed.relu2_2)
+                # Extract style features
+                style_loss = 0
+                for ft_y, gm_s in zip(features_transformed, gram_style):
+                    gm_y = gram_matrix(ft_y)
+                    style_loss += l2_loss(gm_y, gm_s[: photo_img.size(0), :, :])
+                style_loss = lambda_style * style_loss
+                loss = style_loss + content_loss
 
-            loss.backward()
-            opt.step()
-            avg_loss += loss.item()
+                loss.backward()
+                opt.step()
+                avg_loss += loss.item()
 
         save_dict = {
             'epoch': epoch + 1,
