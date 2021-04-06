@@ -49,7 +49,7 @@ class autoencoder(nn.Module):
             nn.ReLU(),
             Conv2dSameBlock(16, 16),
             nn.ConvTranspose2d(16, 3, 18, 1), #256
-            Conv2dSameBlock(3, 3),
+            Conv2dSameBlock(3, 3, relu=False),
             nn.Tanh()
         )
         self.opt = torch.optim.Adam(self.parameters(),lr = start_lr, betas=(0.5, 0.999))
@@ -62,7 +62,7 @@ class autoencoder(nn.Module):
         return x
 
 class Conv2dSameBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, relu=True):
         super(Conv2dSameBlock, self).__init__()
         self.block = nn.Sequential(
             nn.Conv2d(in_channels, in_channels, 3, 1, 1),
@@ -70,11 +70,13 @@ class Conv2dSameBlock(nn.Module):
             nn.ReLU(),
             nn.Conv2d(in_channels, out_channels, 3, 1, 1),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU()
         )
+        self.relu = relu
 
     def forward(self, x):
         x = self.block(x)
+        if self.relu:
+            x = F.relu(x)
         return x
 
 class VGG16(torch.nn.Module):

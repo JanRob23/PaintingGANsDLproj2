@@ -28,7 +28,8 @@ def train(image_dl, device):
     lambda_style = 1e8
     ae = autoencoder(5, device)
     ae.to(device)
-    transformer_net = TransformerNet(learning_rate)
+    print(ae)
+    transformer_net = ae
     transformer_net.to(device)
     vgg = VGG16()
     vgg.to(device)
