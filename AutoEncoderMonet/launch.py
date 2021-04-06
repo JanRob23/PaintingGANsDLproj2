@@ -15,7 +15,7 @@ from fileIO import *
 from AE import *
  
 
-def go(monet, photos):
+def go(monet, photos, train = True):
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     set_seed(719)
@@ -23,7 +23,7 @@ def go(monet, photos):
     img_dl = DataLoader(img_ds, batch_size=1, pin_memory=True)
     photo_img, monet_img = next(iter(img_dl))
 
-    ae = autoencoder(10, device)
+    ae = autoencoder(30, device)
     ae.to(device)
     torch.set_grad_enabled(True)
 
@@ -41,7 +41,8 @@ def go(monet, photos):
             ae.load_model(load_checkpoint('current.ckpt'))
         
     print(ae.epoch)
-    #ae.train(img_dl)
+    if train:
+        ae.train(img_dl)
 
     plt.xlabel("Epochs")
     plt.ylabel("Losses")
