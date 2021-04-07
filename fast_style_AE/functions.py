@@ -47,7 +47,7 @@ def train(image_dl, device):
             t = tqdm(image_dl, leave=False, total=image_dl.__len__( )- 1)
         for j, (c_style, m_style) in enumerate(t):
             photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)
-            if j == 20:
+            if j == 15:
                 used_monet = monet_img
                 features_style = vgg.forward(used_monet)
                 gram_style = [gram_matrix(y) for y in features_style]
