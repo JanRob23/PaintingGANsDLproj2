@@ -26,7 +26,7 @@ def train(image_dl, device):
     learning_rate = 2e-4
     lambda_content = 1e5
     lambda_style = 1e8
-    ae = autoencoder(5, device)
+    ae = autoencoder(30, device)
     ae.to(device)
     transformer_net = ae
     transformer_net.to(device)
@@ -45,17 +45,18 @@ def train(image_dl, device):
             t = tqdmn(image_dl, leave=False, total=image_dl.__len__( )- 1)
         else:
             t = tqdm(image_dl, leave=False, total=image_dl.__len__( )- 1)
-        for j, (c_style, m_style) in enumerate(t):
-            photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)
-            if j == 15:
-                used_monet = monet_img
-                features_style = vgg.forward(used_monet)
-                gram_style = [gram_matrix(y) for y in features_style]
-                print("monet used")
-                monet_img = monet_img.detach().cpu()
-                monet_img = unnorm(monet_img)
-                plt.imshow(monet_img[0].permute(1, 2, 0))
-                plt.show()
+        if epoch == 0:
+            for j, (c_style, m_style) in enumerate(t):
+                photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)
+                if j == 15:
+                    used_monet = monet_img
+                    features_style = vgg.forward(used_monet)
+                    gram_style = [gram_matrix(y) for y in features_style]
+                    print("monet used")
+                    monet_img = monet_img.detach().cpu()
+                    monet_img = unnorm(monet_img)
+                    plt.imshow(monet_img[0].permute(1, 2, 0))
+                    plt.show()
         for i, (content_style, monet_style) in enumerate(t):
             photo_img, monet_img = content_style.float().to(ae.device), monet_style.float().to(ae.device)
             # update_req_grad([self.encoder, self.decoder], False)
