@@ -55,6 +55,10 @@ class autoencoder(nn.Module):
         self.opt = torch.optim.Adam(self.parameters(),lr = start_lr, betas=(0.5, 0.999))
         self.epoch = 0
         self.training_range = range(self.epoch ,self.epochs)
+    def load_model(self, ckpt):
+        self.epoch = ckpt['epoch']
+        self.load_state_dict(ckpt['weights'])
+        self.opt.load_state_dict(ckpt['optimizer'])
 
     def forward(self, x):
         x = self.encoder(x)

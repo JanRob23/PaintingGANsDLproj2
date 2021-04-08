@@ -5,11 +5,14 @@ import random
 import torch
 import torch.nn.init as init
 
-def unnorm(img, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
-    for t, m, s in zip(img, mean, std):
-        t.mul_(s).add_(s)
-        
-    return img
+mean = np.array([0.485, 0.456, 0.406])
+std = np.array([0.229, 0.224, 0.225])
+
+def denormalize(tensors):
+    """ Denormalizes image tensors using mean and std """
+    for c in range(3):
+        tensors[:, c].mul_(std[c]).add_(mean[c])
+    return tensors
 
 def set_seed(seed):
     random.seed(seed)
