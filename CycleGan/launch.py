@@ -24,7 +24,7 @@ def go(monet, photos):
     photo_img, monet_img = next(iter(img_dl))
 
     gan = CycleGAN(3, 3, 50, device)
-
+    print(gan)
     save_dict = {
         'epoch': 0,
         'gen_mtp': gan.gen_mtp.state_dict(),

@@ -14,7 +14,7 @@ from models_AE_VGG import *
 import torch.nn as nn
 import torch.nn.functional as F
 def gram_matrix(y):
-    """ Returns the gram matrix of y (used to compute style loss) """
+    # Returns the gram matrix of y (used to compute style loss)
     (b, c, h, w) = y.size()
     features = y.view(b, c, w * h)
     features_t = features.transpose(1, 2)
@@ -28,7 +28,7 @@ def train(image_dl, device):
     lambda_style = 1e8
     ae = autoencoder(30, device)
     ae.to(device)
-    transformer_net = ae
+    transformer_net = TransformerNet(learning_rate)
     transformer_net.to(device)
     vgg = VGG16()
     vgg.to(device)
@@ -45,6 +45,7 @@ def train(image_dl, device):
             t = tqdmn(image_dl, leave=False, total=image_dl.__len__( )- 1)
         else:
             t = tqdm(image_dl, leave=False, total=image_dl.__len__( )- 1)
+        # select a style image
         if epoch == 0:
             for j, (c_style, m_style) in enumerate(t):
                 photo_img, monet_img = c_style.float().to(ae.device), m_style.float().to(ae.device)

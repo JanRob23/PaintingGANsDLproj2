@@ -19,7 +19,6 @@ class ImageDataset(Dataset):
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-                #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
             ])
         else:
             self.transform = transforms.Compose([
@@ -61,9 +60,11 @@ class PhotoDataset(Dataset):
         self.photo_idx = dict()
         if normalize:
             self.transform = transforms.Compose([
-                transforms.Resize(size),
+                transforms.Resize(int(256 * 1.15)),
+                transforms.RandomCrop(size),
                 transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))                                
+                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
             ])
         else:
             self.transform = transforms.Compose([
@@ -75,8 +76,7 @@ class PhotoDataset(Dataset):
         self.idx = 1
     def __getitem__(self, idx):
         photo_path = os.path.join(self.photo_dir, self.photo_idx[idx])
-        #photo_img = Image.open(photo_path)
-        photo_img = Image.open(f'Data/photo_jpg/photo{self.idx} .jpg')
+        photo_img = Image.open(f'Data/testtest/{self.idx}.jpg')
         photo_img = self.transform(photo_img)
         self.idx +=1
         return photo_img
