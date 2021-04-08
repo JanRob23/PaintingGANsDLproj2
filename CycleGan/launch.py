@@ -41,7 +41,7 @@ def go(monet, photos):
         else:
             gan.load_model(load_checkpoint('current.ckpt'))
 
-    gan.train(img_dl)
+    # gan.train(img_dl)
 
     # plt.xlabel("Epochs")
     # plt.ylabel("Losses")
@@ -65,7 +65,7 @@ def go(monet, photos):
     #     ax[i, 1].axis("off")
     # plt.show()
 
-    ph_ds = PhotoDataset('Data/photo_jpg/')
+    ph_ds = PhotoDataset('Data/test/')
     ph_dl = DataLoader(ph_ds, batch_size=1, pin_memory=True)
     trans = transforms.ToPILImage()
 
@@ -81,7 +81,7 @@ def go(monet, photos):
             pred_monet = gan.gen_ptm(photo.to(device)).cpu().detach()
         pred_monet = unnorm(pred_monet)
         img = trans(pred_monet[0]).convert("RGB")
-        img.save("Data/customMonet/" + str(i+1) + ".jpg")
+        img.save("Data/testResults/cycleGAN/" + str(i+1) + ".jpg")
 
 if __name__ == "__main__":
     monet = 'Data/monet_jpg'

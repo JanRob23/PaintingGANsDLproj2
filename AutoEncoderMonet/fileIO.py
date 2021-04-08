@@ -76,9 +76,12 @@ class PhotoDataset(Dataset):
     def __getitem__(self, idx):
         photo_path = os.path.join(self.photo_dir, self.photo_idx[idx])
         #photo_img = Image.open(photo_path)
-        photo_img = Image.open(f'Data/photo_jpg/photo{self.idx} .jpg')
+        photo_img = Image.open(f'Data/test/{self.idx}.jpg')
         photo_img = self.transform(photo_img)
+        
         self.idx +=1
+        if self.idx == 5:
+            self.idx = 1
         return photo_img
 
     def __len__(self):
