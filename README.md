@@ -1,7 +1,9 @@
 # Project for the course Deep Learning by group 9
 ### Contributors
 Charlie Albietz
+
 Panagiotis Ritas
+
 Jan-Henner Roberg
 
 ### Code used from
